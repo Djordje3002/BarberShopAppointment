@@ -1,18 +1,26 @@
-//
-//  CustomButton.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 29. 7. 2025..
-//
-
 import SwiftUI
 
 struct CustomButton: View {
+    let title: String
+    let action: () -> Void
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button(action: action) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.black)
+                .padding()
+                .frame(width: 300)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(radius: 5)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 0))
+        }
     }
 }
 
 #Preview {
-    CustomButton()
+    CustomButton(title: "Book appointment") {
+        
+    }
 }
