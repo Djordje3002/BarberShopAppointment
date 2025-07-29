@@ -27,7 +27,7 @@ extension ProfileView {
                     .frame(width: 128, height: 128)
                     .clipShape(RoundedRectangle(cornerRadius: 64))
     
-                Text("Calendly Course")
+                Text("User Profile")
                     .font(.largeTitle)
                     .bold()
             }

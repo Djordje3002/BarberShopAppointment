@@ -21,7 +21,6 @@ struct AppointmentView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20.0) {
-                    userInfo
 
                     Divider()
 
@@ -88,19 +87,7 @@ struct AppointmentView: View {
 // MARK: - Subviews
 
 extension AppointmentView {
-    private var userInfo: some View {
-        VStack {
-            Image("pearson-image")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 128, height: 128)
-                .clipShape(RoundedRectangle(cornerRadius: 64))
 
-            Text("Calendly Course")
-                .font(.largeTitle)
-                .bold()
-        }
-    }
 
     private var monthSelector: some View {
         HStack {

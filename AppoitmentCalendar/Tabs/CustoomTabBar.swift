@@ -5,7 +5,6 @@ struct CustomTabBar: View {
     @Binding var selectedTab: Tab
     private var fillColor: Color = Color(.systemGray6).opacity(0.2)
 
-    // Explicit public initializer
     init(selectedTab: Binding<Tab>) {
         self._selectedTab = selectedTab
     }
@@ -25,7 +24,7 @@ struct CustomTabBar: View {
                         Text(tab.title)
                             .font(.caption2)
                     }
-                    .foregroundColor(selectedTab == tab ? .green : .gray)
+                    .foregroundColor(selectedTab == tab ? .primary : .gray)
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
                 }
@@ -33,10 +32,11 @@ struct CustomTabBar: View {
             }
         }
         .padding(.horizontal)
-        .padding(.vertical, 10)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
         .padding(.horizontal)
+        .padding(.bottom, 0)
+        .ignoresSafeArea(.all, edges: .bottom)
         .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 4)
     }
 }

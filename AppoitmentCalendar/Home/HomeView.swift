@@ -26,6 +26,7 @@ struct HomeView: View {
                     reviews
                     
                 }
+
             }
         .ignoresSafeArea()
     }
@@ -159,7 +160,7 @@ extension HomeView {
                 }
 
             }
-            .padding(.bottom, 42)
+            .padding(.bottom, 130)
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.black)
