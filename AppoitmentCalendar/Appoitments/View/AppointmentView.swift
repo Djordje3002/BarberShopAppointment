@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct AppointmentView: View {
     let daysOfWeek: [String] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     @State private var selectedMonthOffset = 0
@@ -87,7 +87,7 @@ struct ContentView: View {
 
 // MARK: - Subviews
 
-extension ContentView {
+extension AppointmentView {
     private var userInfo: some View {
         VStack {
             Image("pearson-image")
@@ -198,6 +198,6 @@ extension ContentView {
 
 
 #Preview {
-    ContentView()
+    AppointmentView()
 }
 
