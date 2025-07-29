@@ -23,7 +23,8 @@ struct HomeView: View {
                     aboutUs
                         .offset(y: -30)
                     
-                    Spacer()
+                    reviews
+                    
                 }
             }
         .ignoresSafeArea()
@@ -123,9 +124,45 @@ extension HomeView {
             }
         }
     
-    private var recensions: some View {
-        VStack {
-            Text("Recensions")
+    private var reviews: some View {
+            VStack(spacing: 30) {
+                Text("Reviews")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Text("What others tell about us")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
+                HStack(spacing: 10) {
+                    ForEach(1..<6) { _ in
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.title2)
+                    }
+                }
+                NavigationLink {
+                    ReviewsView()
+                } label: {
+                    Text("See Reviews")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .padding()
+                        .frame(width: 300)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(radius: 5)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 0))
+                }
+
+            }
+            .padding(.bottom, 42)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.black)
         }
-    }
+
 }
