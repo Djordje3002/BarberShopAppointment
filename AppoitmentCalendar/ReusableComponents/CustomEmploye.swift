@@ -15,12 +15,17 @@ struct CustomEmploye: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: 22) {
                 Image(image)
-                    .font(.system(size: 36, weight: .semibold))
-                    .foregroundColor(.black)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 60, height: 60)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 2))
+                    .shadow(radius: 5)
 
-                VStack {
+
+                VStack(alignment: .leading, spacing: 6) {
                     Text(name)
                         .font(.system(size: 20, weight: .medium))
                         .foregroundColor(.primary)
@@ -47,5 +52,7 @@ struct CustomEmploye: View {
 
 
 #Preview {
-   CustomEmploye(name: <#T##String#>, description: <#T##String#>, image: <#T##String#>, action: <#T##() -> Void#>)
+    CustomEmploye(name: "Michael", description: "Best barber", image: "barber-1") {
+        
+    }
 }

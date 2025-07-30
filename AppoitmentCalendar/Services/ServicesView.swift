@@ -11,10 +11,62 @@ struct ServicesView: View {
     var body: some View {
         ScrollView {
             VStack {
+                picture
+                    .frame(maxWidth: .infinity)
+                    .ignoresSafeArea(edges: .top)
                 
+                VStack(alignment: .leading) {
+                    Text("Choose barber for your next cut")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(.black)
+                        .padding(.vertical, 20)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white)
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 6)
+                .padding(.horizontal)
+
+
+                VStack {
+                
+                    CustomEmploye(name: "Michael", description: "CEO and barber", image: "barber-1") {
+
+                    }
+                    CustomEmploye(name: "John", description: "Barber", image: "barber-2") {
+
+                    }
+                    CustomEmploye(name: "Vukasin", description: "Best barber", image: "barber-3") {
+
+                    }
+                    CustomEmploye(name: "Vukasin", description: "Young barber", image: "barber-0") {
+
+                    }
+                }
+                .padding()
+                .padding(.bottom, 130)
             }
+
         }
+    .ignoresSafeArea()
     }
+}
+
+extension ServicesView {
+    private var picture: some View {
+            Image("barber-0")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity)
+                .background(Color.black.opacity(0.3))
+                .overlay(
+                    ZStack {
+                        LinearGradient(gradient: Gradient(colors: [.black.opacity(0.6), .clear]), startPoint: .top, endPoint: .bottom)
+                    }
+                )
+                .clipped()
+        }
 }
 
 #Preview {
