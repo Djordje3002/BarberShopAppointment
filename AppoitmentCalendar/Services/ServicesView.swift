@@ -40,7 +40,7 @@ struct ServicesView: View {
                     CustomEmploye(name: "Vukasin", description: "Best barber", image: "barber-3") {
 
                     }
-                    CustomEmploye(name: "Vukasin", description: "Young barber", image: "barber-0") {
+                    CustomEmploye(name: "Mirko", description: "Young barber", image: "barber-0") {
 
                     }
                 }

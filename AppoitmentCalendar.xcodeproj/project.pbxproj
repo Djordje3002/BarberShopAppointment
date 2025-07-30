@@ -6,7 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		210BFDFA2E3AAF5B00C0E831 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 210BFDF92E3AAF5B00C0E831 /* GoogleService-Info.plist */; };
+		210BFDFD2E3AAFCA00C0E831 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFDFC2E3AAFCA00C0E831 /* FirebaseAnalytics */; };
+		210BFDFF2E3AAFCA00C0E831 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFDFE2E3AAFCA00C0E831 /* FirebaseAnalyticsCore */; };
+		210BFE012E3AAFCA00C0E831 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFE002E3AAFCA00C0E831 /* FirebaseAuth */; };
+		210BFE032E3AAFCA00C0E831 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFE022E3AAFCA00C0E831 /* FirebaseCore */; };
+		210BFE052E3AAFCA00C0E831 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFE042E3AAFCA00C0E831 /* FirebaseDatabase */; };
+		210BFE072E3AAFCA00C0E831 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFE062E3AAFCA00C0E831 /* FirebaseFirestore */; };
+		210BFE092E3AAFCA00C0E831 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 210BFE082E3AAFCA00C0E831 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		210BFDF92E3AAF5B00C0E831 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		215766C62E35692700A05018 /* AppoitmentCalendar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppoitmentCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -23,6 +35,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				210BFE052E3AAFCA00C0E831 /* FirebaseDatabase in Frameworks */,
+				210BFDFD2E3AAFCA00C0E831 /* FirebaseAnalytics in Frameworks */,
+				210BFE012E3AAFCA00C0E831 /* FirebaseAuth in Frameworks */,
+				210BFE032E3AAFCA00C0E831 /* FirebaseCore in Frameworks */,
+				210BFE092E3AAFCA00C0E831 /* FirebaseStorage in Frameworks */,
+				210BFDFF2E3AAFCA00C0E831 /* FirebaseAnalyticsCore in Frameworks */,
+				210BFE072E3AAFCA00C0E831 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -34,6 +53,7 @@
 			children = (
 				215766C82E35692700A05018 /* AppoitmentCalendar */,
 				215766C72E35692700A05018 /* Products */,
+				210BFDF92E3AAF5B00C0E831 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -65,6 +85,13 @@
 			);
 			name = AppoitmentCalendar;
 			packageProductDependencies = (
+				210BFDFC2E3AAFCA00C0E831 /* FirebaseAnalytics */,
+				210BFDFE2E3AAFCA00C0E831 /* FirebaseAnalyticsCore */,
+				210BFE002E3AAFCA00C0E831 /* FirebaseAuth */,
+				210BFE022E3AAFCA00C0E831 /* FirebaseCore */,
+				210BFE042E3AAFCA00C0E831 /* FirebaseDatabase */,
+				210BFE062E3AAFCA00C0E831 /* FirebaseFirestore */,
+				210BFE082E3AAFCA00C0E831 /* FirebaseStorage */,
 			);
 			productName = AppoitmentCalendar;
 			productReference = 215766C62E35692700A05018 /* AppoitmentCalendar.app */;
@@ -94,6 +121,9 @@
 			);
 			mainGroup = 215766BD2E35692600A05018;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 215766C72E35692700A05018 /* Products */;
 			projectDirPath = "";
@@ -109,6 +139,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				210BFDFA2E3AAF5B00C0E831 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +351,55 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		210BFDFC2E3AAFCA00C0E831 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		210BFDFE2E3AAFCA00C0E831 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		210BFE002E3AAFCA00C0E831 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		210BFE022E3AAFCA00C0E831 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		210BFE042E3AAFCA00C0E831 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		210BFE062E3AAFCA00C0E831 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		210BFE082E3AAFCA00C0E831 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 210BFDFB2E3AAFCA00C0E831 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 215766BE2E35692600A05018 /* Project object */;
 }
