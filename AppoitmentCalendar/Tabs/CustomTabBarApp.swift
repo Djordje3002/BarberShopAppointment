@@ -18,7 +18,7 @@ struct CustomTabBarApp: View {
                 NewsView()
                     .tag(Tab.news)
                     .toolbar(.hidden, for: .tabBar)
-                ProfileView()
+                SettingsView()
                     .tag(Tab.profile)
                     .toolbar(.hidden, for: .tabBar)
             }

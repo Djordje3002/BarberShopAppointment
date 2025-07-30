@@ -9,7 +9,13 @@ import SwiftUI
 
 struct ProfileView: View {
     var body: some View {
-        userInfo
+        VStack {
+            CustomNavBar(title: "Profile")
+            userInfo
+            
+            Spacer()
+        }
+        .navigationBarBackButtonHidden()
     }
 }
 
@@ -32,4 +38,6 @@ extension ProfileView {
                     .bold()
             }
         }
+    
+    
 }

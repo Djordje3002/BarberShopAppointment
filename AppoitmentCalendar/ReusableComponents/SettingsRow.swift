@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct SettingsRow: View {
     let text: String
     let icon: String
