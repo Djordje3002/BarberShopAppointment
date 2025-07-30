@@ -6,3 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
+
+struct NewsModel: Identifiable, Codable {
+    @DocumentID var id: String?
+    var title: String
+    var body: String
+}

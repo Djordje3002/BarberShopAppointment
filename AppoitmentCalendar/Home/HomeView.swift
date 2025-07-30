@@ -24,7 +24,9 @@ struct HomeView: View {
                         .offset(y: -30)
                     
                     reviews
-                    
+                    MapView()
+                        .padding(.bottom, 130)
+
                 }
 
             }
@@ -160,10 +162,9 @@ extension HomeView {
                 }
 
             }
-            .padding(.bottom, 130)
+            .padding(.bottom, 20)
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.black)
         }
-
 }

@@ -18,6 +18,7 @@ struct AppointmentView: View {
                 appointments
                     .padding()
             }
+            .padding(.bottom, 130)
         }
     .ignoresSafeArea()
         

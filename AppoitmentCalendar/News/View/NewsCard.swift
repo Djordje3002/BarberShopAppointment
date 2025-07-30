@@ -8,11 +8,23 @@
 import SwiftUI
 
 struct NewsCard: View {
+    let news: NewsModel
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(news.title)
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            Text(news.body)
+                .font(.body)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }
 
-#Preview {
-    NewsCard()
-}
+
