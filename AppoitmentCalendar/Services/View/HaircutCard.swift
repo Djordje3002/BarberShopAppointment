@@ -8,11 +8,50 @@
 import SwiftUI
 
 struct HaircutCard: View {
+    let option: HaircutOption
+    let isSelected: Bool
+    let action: () -> Void
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button(action: action) {
+            HStack {
+                Image(option.imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 80, height: 80)
+                    .clipped()
+                    .cornerRadius(12)
+                
+                VStack(alignment: .leading) {
+                    Text(option.name)
+                        .font(.headline)
+                    Text(option.description)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+                
+                Image(systemName: "chevrolet.right")
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal)
     }
 }
 
 #Preview {
-    HaircutCard()
+    HaircutCard(
+        option: HaircutOption(
+            name: "Classic Haircut",
+            description: "Timeless clean look.",
+            imageName: "cut-classic"
+        ),
+        isSelected: true,
+        action: {}
+    )
 }
+

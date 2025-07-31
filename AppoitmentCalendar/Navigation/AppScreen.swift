@@ -11,10 +11,10 @@ import SwiftUI
 enum AppScreen: Hashable {
     case home
     case sevices
+    case choseCut
     case choseDate
-    case shoseTime
+    case choseTime
     case cofirmAppointment
-    case successAppointment
     case profile
     case waitingList
     case aboutApp
@@ -32,14 +32,15 @@ extension AppScreen {
             HomeView()
         case .sevices:
             ServicesView()
+        case .choseCut:
+            ChoseCutView()
         case .choseDate:
             ChooseDateView()
-        case .shoseTime:
-            ChooseTimeView()
+//            Look at this later i am not sure
+        case .choseTime:
+            ChooseTimeView(date: Date.now)
         case .cofirmAppointment:
             ConfirmAppointmentView()
-        case .successAppointment:
-            SuccessAppointmentView()
         case .profile:
             ProfileView()
         case .waitingList:

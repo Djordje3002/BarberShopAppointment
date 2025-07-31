@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var router: NavigationRouter
+    
     var body: some View {
             ScrollView {
                 VStack {
@@ -16,7 +18,7 @@ struct HomeView: View {
                         .ignoresSafeArea(edges: .top)
                     
                     CustomButton(title: "Book appointment") {
-                        print("Book appointment tapped")
+                        router.push(.sevices)
                     }
                     .offset(y: -100)
                     
@@ -36,6 +38,7 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environmentObject(NavigationRouter())
 }
 
 extension HomeView {

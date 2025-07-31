@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+class ChoseCutViewModel: ObservableObject {
+    @Published var selectedCut: HaircutOption?
+}

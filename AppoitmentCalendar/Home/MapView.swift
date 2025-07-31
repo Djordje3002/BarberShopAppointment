@@ -2,51 +2,36 @@ import SwiftUI
 import MapKit
 import CoreLocation
 
+import SwiftUI
+import MapKit
+
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
-
-    var body: some View {
-        Map(coordinateRegion: $locationManager.region, showsUserLocation: true)
-            .frame(height: 250)
-            .cornerRadius(16)
-            .padding()
-            .onAppear {
-                locationManager.checkIfLocationServicesIsEnabled()
-            }
-    }
-}
-
-final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    private let manager = CLLocationManager()
     
-    @Published var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // Default to SF
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 44.7866, longitude: 20.4489),
+        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     )
 
-    override init() {
-        super.init()
-        manager.delegate = self
-    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Find Us Here")
+                .font(.title2.bold())
+                .padding(.horizontal)
 
-    func checkIfLocationServicesIsEnabled() {
-        if CLLocationManager.locationServicesEnabled() {
-            manager.desiredAccuracy = kCLLocationAccuracyBest
-            manager.requestWhenInUseAuthorization()
-            manager.startUpdatingLocation()
+            Map(coordinateRegion: $region, showsUserLocation: true)
+                .frame(height: 250)
+                .cornerRadius(20)
+                .padding()
         }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.first else { return }
-        DispatchQueue.main.async {
-            self.region = MKCoordinateRegion(
-                center: location.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-            )
+        .onReceive(locationManager.$currentLocation) { location in
+            if let loc = location {
+                region.center = loc.coordinate
+            }
         }
     }
 }
+
 
 
 #Preview {

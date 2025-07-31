@@ -11,7 +11,7 @@ struct ReviewsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            navigation
+            CustomNavBar(title: "Reviews")
             
             if viewModel.isLoading {
                 ProgressView()
@@ -43,16 +43,3 @@ struct ReviewsView: View {
     #Preview {
         ReviewsView()
     }
-
-extension ReviewsView {
-    var navigation: some View {
-        Text("Reviews")
-            .font(.title2.bold())
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.white)
-            .foregroundColor(.black)
-            .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-
-    }
-}
