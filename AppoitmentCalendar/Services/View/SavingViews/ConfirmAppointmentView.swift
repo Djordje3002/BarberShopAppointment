@@ -19,7 +19,7 @@ struct ConfirmAppointmentView: View {
             Spacer()
 
             Button("Book Now") {
-                appointment.bookAppointment {_ in
+                appointment.bookAppointment {
                     print("Service: \(appointment.selectedCut?.name ?? "Not selected")")
                     print("Date: \(formattedDate(appointment.selectedDate))")
                     print(("Time: \(appointment.selectedTime)"))
