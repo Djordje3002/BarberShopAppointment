@@ -20,10 +20,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct AppoitmentCalendarApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var appointment = AppointmentBooking()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appointment)
         }
     }
 }

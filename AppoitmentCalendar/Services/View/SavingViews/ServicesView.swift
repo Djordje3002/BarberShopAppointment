@@ -1,0 +1,72 @@
+import SwiftUI
+
+struct ServicesView: View {
+    @EnvironmentObject var router: NavigationRouter
+    @EnvironmentObject var appointment: AppointmentBooking
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                picture
+                    .frame(maxWidth: .infinity)
+                    .ignoresSafeArea(edges: .top)
+
+                VStack(alignment: .leading) {
+                    Text("Choose barber for your next cut")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(.black)
+                        .padding(.vertical, 20)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white)
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 6)
+                .padding(.horizontal)
+
+                VStack {
+                    CustomEmploye(name: "Michael", description: "CEO and barber", image: "barber-1") {
+                        appointment.barberName = "Michael"
+                        print("Barber: \(appointment.barberName)")
+                        router.push(.choseCut)
+                    }
+                    CustomEmploye(name: "John", description: "Barber", image: "barber-2") {
+                        appointment.barberName = "John"
+                        router.push(.choseCut)
+                    }
+                    CustomEmploye(name: "Mirko", description: "Young Barber", image: "barber-0") {
+                        appointment.barberName = "Mirko"
+                        router.push(.choseCut)
+                    }
+                    CustomEmploye(name: "Vukasin", description: "Master Barber", image: "barber-3") {
+                        appointment.barberName = "Vukasin"
+                        router.push(.choseCut)
+                    }
+                }
+                .padding()
+                .padding(.bottom, 130)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+extension ServicesView {
+    private var picture: some View {
+        Image("barber-0")
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(maxWidth: .infinity)
+            .background(Color.black.opacity(0.3))
+            .overlay(
+                LinearGradient(gradient: Gradient(colors: [.black.opacity(0.6), .clear]), startPoint: .top, endPoint: .bottom)
+            )
+            .clipped()
+    }
+}
+
+#Preview {
+    ServicesView()
+        .environmentObject(NavigationRouter())
+        .environmentObject(AppointmentBooking())
+}

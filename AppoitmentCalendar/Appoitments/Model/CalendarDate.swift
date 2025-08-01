@@ -13,12 +13,3 @@ struct CalendarDate: Identifiable {
     let date: Date
     let isEnabled: Bool
 }
-
-
-// MARK: - Helpers
-
-extension Date {
-    func isSameDay(as other: Date) -> Bool {
-        Calendar.current.isDate(self, inSameDayAs: other)
-    }
-}

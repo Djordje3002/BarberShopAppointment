@@ -31,7 +31,8 @@ struct HaircutCard: View {
                 }
                 Spacer()
                 
-                Image(systemName: "chevrolet.right")
+                Image(systemName: "chevron.right")
+                    .padding()
             }
             .padding()
             .background(Color.white)

@@ -16,6 +16,7 @@ struct CustomNavBar: View {
             ZStack {
                 Text(title)
                     .font(.title2.bold())
+
                 HStack {
                     Image(systemName: "chevron.left")
                         .onTapGesture {
@@ -25,13 +26,18 @@ struct CustomNavBar: View {
                     Spacer()
                 }
             }
+            .padding()
+            .padding(.bottom, 8)
+            .frame(maxWidth: .infinity)
+            .background(
+                Color.white
+                    .ignoresSafeArea(edges: .top)
+            )
+            .foregroundColor(.black)
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 6)
         }
-        .padding()
-        .background(Color.white)
-        .foregroundColor(.black)
-        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .padding(.bottom)
     }
+
 }
 
 #Preview {

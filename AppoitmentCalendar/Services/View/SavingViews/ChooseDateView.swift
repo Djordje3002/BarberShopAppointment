@@ -26,6 +26,7 @@ struct ChooseDateView: View {
                         CustomButton(title: "Next") {
                             if let selected = selectedDate {
                                 appointment.selectedDate = selected
+                                print("Selected date is: \(selected)")
                                 router.push(.choseTime)
                             }
                         }

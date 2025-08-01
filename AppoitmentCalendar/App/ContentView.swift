@@ -1,25 +1,20 @@
-//
-//  ContentView.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 30. 7. 2025..
-//
-
 import SwiftUI
 
 struct ContentView: View {
     @StateObject private var router = NavigationRouter()
+    @StateObject private var appointment = AppointmentBooking()
 
     var body: some View {
         NavigationStack(path: $router.path) {
             CustomTabBarApp()
-                .navigationDestination(for: AppScreen.self) { $0.destinationView() }
+                .navigationDestination(for: AppScreen.self) { $0.destinationView(appointment: appointment) }
         }
-        .environmentObject(router) 
+        .environmentObject(router)
+        .environmentObject(appointment)
     }
 }
-
 
 #Preview {
     ContentView()
 }
+
