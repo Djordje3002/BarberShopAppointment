@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AboutApp: View {
+struct AboutView: View {
     var body: some View {
         VStack {
             CustomNavBar(title: "About")
@@ -20,5 +20,5 @@ struct AboutApp: View {
 }
 
 #Preview {
-    AboutApp()
+    AboutView()
 }
