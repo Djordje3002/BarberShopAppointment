@@ -40,10 +40,3 @@ struct ConfirmAppointmentView: View {
 }
 
 
-
-//#Preview {
-//    ConfirmAppointmentView()
-//        .environmentObject(AppointmentViewModel())
-//        .environmentObject(NavigationRouter())
-//}
-
