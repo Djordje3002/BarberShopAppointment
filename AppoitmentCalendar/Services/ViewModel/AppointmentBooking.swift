@@ -13,7 +13,7 @@ class AppointmentBooking: ObservableObject {
     @Published var barberName: String = ""
     
     // Save to Firestore
-    func bookAppointment(completion: @escaping () -> Void = {}) {
+    func bookAppointment(currentUser: User, completion: @escaping () -> Void = {}) {
         let db = Firestore.firestore()
 
         guard let selectedCut = selectedCut else {
@@ -26,7 +26,10 @@ class AppointmentBooking: ObservableObject {
             "price": selectedCut.price,
             "barberName": barberName,
             "time": selectedTime,
-            "date": Timestamp(date: selectedDate)
+            "date": Timestamp(date: selectedDate),
+            "username": currentUser.username,
+            "email": currentUser.email ?? "Email is not inserted",
+            "timestamp": Timestamp(date: Date())
         ]
 
         db.collection("appointments").addDocument(data: data) { error in

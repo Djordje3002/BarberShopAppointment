@@ -10,7 +10,9 @@ import SwiftUI
 struct CreatePasswordView: View {
     @EnvironmentObject var viewModel: RegistrationViewModel
     @Environment(\.dismiss) var dismiss
-
+    @EnvironmentObject var router: NavigationRouter
+    @EnvironmentObject var registrationViewModel: RegistrationViewModel
+    
     var body: some View {
         VStack(spacing: 12) {
             Text("Create password")
@@ -31,8 +33,17 @@ struct CreatePasswordView: View {
                     .padding(.top)
             }
             
+//            Button {
+//                router.push(.cofirmAppointment)
+//            } label: {
+//                Text("Next")
+//                    .modifier(MainButtonModifier())
+//            }
+
+            
             NavigationLink {
-                CompleteSignUpView()
+                AddPhoneNumber()
+                    .environmentObject(registrationViewModel)
                     .navigationBarBackButtonHidden()
             } label: {
                 Text("Next")

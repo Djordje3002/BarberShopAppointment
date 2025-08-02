@@ -1,14 +1,8 @@
-//
-//  ContentViewModel.swift
-//  InstagramTutorial
-//
-//  Created by Djordje on 27. 6. 2025..
-//
-
 import Foundation
 import FirebaseAuth
 import Combine
 
+@MainActor
 class ContentViewModel: ObservableObject {
     
     private let service = AuthService.shared
@@ -22,14 +16,18 @@ class ContentViewModel: ObservableObject {
     }
     
     func setupSubscribers() {
-        service.$userSession.sink { [weak self] userSession in
-            self?.userSession = userSession
-        }
-        .store(in: &cancellables)
+        service.$userSession
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] userSession in
+                self?.userSession = userSession
+            }
+            .store(in: &cancellables)
         
-        service.$currentUser.sink { [weak self] currentUser in
-            self?.currentUser = currentUser
-        }
-        .store(in: &cancellables)
+        service.$currentUser
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] currentUser in
+                self?.currentUser = currentUser
+            }
+            .store(in: &cancellables)
     }
 }

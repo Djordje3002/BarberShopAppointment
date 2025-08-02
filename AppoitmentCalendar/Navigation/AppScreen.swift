@@ -3,6 +3,10 @@
 import SwiftUI
 
 enum AppScreen: Hashable {
+    case login
+    case addEmail
+    case createPassword
+    case completeSignUp
     case home
     case sevices
     case choseCut
@@ -14,42 +18,69 @@ enum AppScreen: Hashable {
     case aboutApp
     case notifications
     case privacyPolicy
-    case logout
 }
 
 // MARK: - Navigation Destination Resolver
 extension AppScreen {
     @ViewBuilder
-    func destinationView(appointment: AppointmentBooking) -> some View {
+    func destinationView(
+        appointment: AppointmentBooking,
+        registrationViewModel: RegistrationViewModel
+    ) -> some View {
         switch self {
+        case .login:
+            LoginView()
+                .environmentObject(registrationViewModel)
+
+        case .addEmail:
+            AddEmailView()
+                .environmentObject(registrationViewModel)
+
+        case .createPassword:
+            CreatePasswordView()
+                .environmentObject(registrationViewModel)
+
+        case .completeSignUp:
+            CompleteSignUpView()
+                .environmentObject(registrationViewModel)
+
         case .home:
             HomeView()
+
         case .sevices:
             ServicesView()
+                .environmentObject(appointment)
+
         case .choseCut:
             ChoseCutView()
+                .environmentObject(appointment)
+
         case .choseDate:
             ChooseDateView()
                 .environmentObject(appointment)
+
         case .choseTime:
-            ChooseTimeView(/*date: Date.now*/)
+            ChooseTimeView()
                 .environmentObject(appointment)
+
         case .cofirmAppointment:
             ConfirmAppointmentView()
                 .environmentObject(appointment)
+
         case .profile:
             ProfileView()
+
         case .waitingList:
             WaitListView()
+
         case .aboutApp:
-            AboutApp()
+            AboutView()
+
         case .notifications:
             NotificationsView()
+
         case .privacyPolicy:
             PrivacyPolicy()
-        case .logout:
-            EmptyView()
         }
     }
 }
-

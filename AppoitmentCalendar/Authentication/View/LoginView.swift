@@ -1,18 +1,24 @@
 import SwiftUI
 
 struct LoginView: View {
-
     @StateObject var viewModel = LogInViewModel()
-    
+    @EnvironmentObject var router: NavigationRouter
+    @EnvironmentObject var registrationViewModel: RegistrationViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
+
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
 
-                Image("instagram_logo")
+                Image("barber-0")
                     .resizable()
-                    .scaledToFit()
-                    .frame(width: 220, height: 100)
+                    .scaledToFill()
+                    .frame(width: 220, height: 120)
+                    .clipped()
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                    .padding(.bottom, 32)
 
                 VStack {
                     TextField("Enter your email: ", text: $viewModel.email)
@@ -24,20 +30,9 @@ struct LoginView: View {
                 }
 
                 Button {
-                    print("show forgot password")
-                } label: {
-                    Text("Forgot password?")
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-                        .padding(.top)
-                        .padding(.trailing, 28)
-                }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-
-                Button {
                     Task {
-                        try await viewModel.signIn()
-                    }
+                            try await authViewModel.login(email: viewModel.email, password: viewModel.password)
+                        }
                 } label: {
                     Text("Log In")
                         .font(.subheadline)
@@ -53,38 +48,12 @@ struct LoginView: View {
                         .padding(.top)
                 }
 
-                HStack {
-                    Rectangle()
-                        .frame(width: UIScreen.main.bounds.width / 2 - 40, height: 0.5)
-
-                    Text("OR")
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-
-                    Rectangle()
-                        .frame(width: UIScreen.main.bounds.width / 2 - 40, height: 0.5)
-                }
-                .foregroundStyle(.gray)
-                .padding()
-
-                HStack {
-                    Image("faceboook_logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20)
-
-                    Text("Continue with Facebook")
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.blue)
-                }
-                .padding(.top, 8)
-
                 Spacer()
                 Divider()
 
                 NavigationLink {
                     AddEmailView()
+                        .environmentObject(registrationViewModel)
                         .navigationBarBackButtonHidden(true)
                 } label: {
                     HStack(spacing: 3) {
@@ -102,5 +71,6 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
+        .environmentObject(NavigationRouter())
+        .environmentObject(RegistrationViewModel())
 }
-

@@ -7,6 +7,9 @@ struct Appointment: Codable, Identifiable {
     var haircut: HaircutType
     var date: Date
     var time: String
+    var username: String?
+    var email: String?
+    var phoneNumber: String?
 
     var price: Double {
         haircut.price

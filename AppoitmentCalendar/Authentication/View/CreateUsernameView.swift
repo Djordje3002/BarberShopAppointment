@@ -10,6 +10,7 @@ import SwiftUI
 struct CreateUsernameView: View {
     @EnvironmentObject var viewModel: RegistrationViewModel
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var registrationViewModel: RegistrationViewModel
 
     var body: some View {
         VStack(spacing: 12) {
@@ -32,6 +33,7 @@ struct CreateUsernameView: View {
 
             NavigationLink {
                 CreatePasswordView()
+                    .environmentObject(registrationViewModel)
                     .navigationBarBackButtonHidden(true)
             } label: {
                 Text("Next")

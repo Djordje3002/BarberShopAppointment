@@ -41,9 +41,15 @@ struct SettingsView: View {
                         router.push(.privacyPolicy)
                     }
 
-                    SettingsRow(text: "Log Out", icon: "arrow.backward.square.fill") {
-                        router.push(.logout)
-                    }
+                    SettingsRow(
+                        text: "Log Out",
+                        icon: "arrow.backward.square.fill",
+                        action: {
+                            Task {
+                                try? await AuthService.shared.signoOut()
+                            }
+                        }
+                    )
                 }
                 .padding()
             }

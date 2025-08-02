@@ -3,6 +3,8 @@ import SwiftUI
 struct AddEmailView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var viewModel: RegistrationViewModel
+    @EnvironmentObject var router: NavigationRouter
+    @EnvironmentObject var registrationViewModel: RegistrationViewModel
 
     var body: some View {
         VStack(spacing: 12) {
@@ -22,9 +24,10 @@ struct AddEmailView: View {
                     .modifier(IGTextFieldModifier())
                     .padding(.top)
             }
-
+            
             NavigationLink {
                 CreateUsernameView()
+                    .environmentObject(registrationViewModel)
                     .navigationBarBackButtonHidden(true)
             } label: {
                 Text("Next")
