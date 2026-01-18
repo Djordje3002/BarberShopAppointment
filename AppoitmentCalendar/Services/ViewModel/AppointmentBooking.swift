@@ -53,6 +53,31 @@ class AppointmentBooking: ObservableObject {
         }
     }
 
+    // Fetch booked times for specific date and barber
+    func fetchBookedTimes(date: Date, barberName: String) async throws -> [String] {
+        let db = Firestore.firestore()
+        let snapshot = try await db.collection("appointments")
+            .whereField("barberName", isEqualTo: barberName)
+            .whereField("date", isEqualTo: Timestamp(date: date))
+            .getDocuments()
+        
+        return snapshot.documents.compactMap { $0.data()["time"] as? String }
+    }
+    
+    // Fetch appointments for current user
+    func fetchUserAppointments(email: String) async throws -> [Appointment] {
+        let db = Firestore.firestore()
+        let snapshot = try await db.collection("appointments")
+            .whereField("email", isEqualTo: email)
+            .order(by: "timestamp", descending: true)
+            .getDocuments()
+            
+        return snapshot.documents.compactMap { doc -> Appointment? in
+            let data = doc.data()
+            return Appointment(id: doc.documentID, data: data)
+        }
+    }
+
     // Reset form after booking
     func reset() {
         selectedCut = nil
@@ -63,6 +88,38 @@ class AppointmentBooking: ObservableObject {
         notes = ""
         barberName = ""
         errorMessage = nil
+    }
+}
+
+struct Appointment: Identifiable, Codable {
+    let id: String
+    let cutName: String
+    let price: Double
+    let barberName: String
+    let time: String
+    let date: Date
+    let username: String
+    let email: String
+    
+    init?(id: String, data: [String: Any]) {
+        self.id = id
+        guard
+            let cutName = data["cutName"] as? String,
+            let price = data["price"] as? Double,
+            let barberName = data["barberName"] as? String,
+            let time = data["time"] as? String,
+            let timestamp = data["date"] as? Timestamp,
+            let username = data["username"] as? String,
+            let email = data["email"] as? String
+        else { return nil }
+        
+        self.cutName = cutName
+        self.price = price
+        self.barberName = barberName
+        self.time = time
+        self.date = timestamp.dateValue()
+        self.username = username
+        self.email = email
     }
 }
 

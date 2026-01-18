@@ -5,7 +5,8 @@ struct ChooseTimeView: View {
     @EnvironmentObject var router: NavigationRouter
     @EnvironmentObject var appointment: AppointmentBooking
 
-    @State private var selectedTime: String? = nil
+    @State private var bookedTimes: [String] = []
+    @State private var isLoading = false
 
     let times = [
         "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -23,23 +24,38 @@ struct ChooseTimeView: View {
                 .font(.title2)
                 .bold()
 
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                ForEach(times, id: \.self) { time in
-                    Button(action: {
-                        selectedTime = time
-                    }) {
-                        Text(time)
-                            .frame(maxWidth: .infinity)
-                            .padding(8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(selectedTime == time ? Color.blue : Color.gray.opacity(0.2))
-                            )
-                            .foregroundColor(selectedTime == time ? .white : .primary)
+            if isLoading {
+                ProgressView()
+                    .padding()
+            } else {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
+                    ForEach(times, id: \.self) { time in
+                        let isBooked = bookedTimes.contains(time)
+                        Button(action: {
+                            if !isBooked {
+                                selectedTime = time
+                            }
+                        }) {
+                            Text(time)
+                                .frame(maxWidth: .infinity)
+                                .padding(8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(isBooked ? Color.red.opacity(0.3) : (selectedTime == time ? Color.blue : Color.gray.opacity(0.2)))
+                                )
+                                .foregroundColor(isBooked ? .gray : (selectedTime == time ? .white : .primary))
+                                .overlay(
+                                    isBooked ?
+                                    Image(systemName: "xmark")
+                                        .foregroundColor(.red)
+                                    : nil
+                                )
+                        }
+                        .disabled(isBooked)
                     }
                 }
+                .padding()
             }
-            .padding()
 
             if selectedTime != nil {
                 CustomButton(title: "Confirm") {
@@ -54,6 +70,15 @@ struct ChooseTimeView: View {
         }
         .padding()
         .navigationBarBackButtonHidden()
+        .task {
+            isLoading = true
+            do {
+                bookedTimes = try await appointment.fetchBookedTimes(date: appointment.selectedDate, barberName: appointment.barberName)
+            } catch {
+                print("Failed to fetch booked times: \(error)")
+            }
+            isLoading = false
+        }
     }
 
     private func formattedDate(_ date: Date) -> String {
