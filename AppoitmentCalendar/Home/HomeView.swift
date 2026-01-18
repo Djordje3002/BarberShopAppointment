@@ -18,7 +18,7 @@ struct HomeView: View {
                         .ignoresSafeArea(edges: .top)
                     
                     CustomButton(title: "Book appointment") {
-                        router.push(.sevices)
+                        router.push(.services)
                     }
                     .offset(y: -100)
                     

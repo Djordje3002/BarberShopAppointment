@@ -1,6 +1,5 @@
 
 
-import SwiftUICore
 import SwiftUI
 
 struct SettingsView: View {
@@ -46,7 +45,7 @@ struct SettingsView: View {
                         icon: "arrow.backward.square.fill",
                         action: {
                             Task {
-                                try? await AuthService.shared.signoOut()
+                                try? await AuthService.shared.signOut()
                             }
                         }
                     )

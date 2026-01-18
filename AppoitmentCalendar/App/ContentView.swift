@@ -1,37 +1,33 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var router = NavigationRouter()
-    @StateObject private var appointment = AppointmentBooking()
-    @StateObject private var contentViewModel = ContentViewModel() // Observes AuthService
-    @StateObject private var registrationViewModel = RegistrationViewModel()
-    @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var viewModelProvider = ViewModelProvider()
 
     var body: some View {
-        NavigationStack(path: $router.path) {
+        NavigationStack(path: $viewModelProvider.router.path) {
             Group {
-                if contentViewModel.userSession == nil {
+                if viewModelProvider.contentViewModel.userSession == nil {
                     LoginView()
-                        .environmentObject(authViewModel)
-                        .environmentObject(registrationViewModel)
-                } else if contentViewModel.currentUser != nil {
+                        .environmentObject(viewModelProvider.authViewModel)
+                        .environmentObject(viewModelProvider.registrationViewModel)
+                } else if viewModelProvider.contentViewModel.currentUser != nil {
                     CustomTabBarApp()
-                        .navigationDestination(for: AppScreen.self) {
-                            $0.destinationView(
-                                appointment: appointment,
-                                registrationViewModel: registrationViewModel
-                            )
-                        }
                 } else {
                     ProgressView("Loading...")
                 }
             }
+            .navigationDestination(for: AppScreen.self) {
+                $0.destinationView(
+                    appointment: viewModelProvider.appointment,
+                    registrationViewModel: viewModelProvider.registrationViewModel
+                )
+            }
         }
-        .environmentObject(router)
-        .environmentObject(appointment)
-        .environmentObject(contentViewModel)
-        .environmentObject(registrationViewModel)
-        .environmentObject(authViewModel)
+        .environmentObject(viewModelProvider.router)
+        .environmentObject(viewModelProvider.appointment)
+        .environmentObject(viewModelProvider.contentViewModel)
+        .environmentObject(viewModelProvider.registrationViewModel)
+        .environmentObject(viewModelProvider.authViewModel)
     }
 }
 

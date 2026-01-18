@@ -6,40 +6,37 @@ import FirebaseFirestore
 @MainActor
 class AuthService {
     
-    @Published var userSession: FirebaseAuth.User?
+    @Published var userSession: FirebaseAuth.User? = Auth.auth().currentUser
     @Published var currentUser: User?
 
     static let shared = AuthService()
     
     init() {
         Task {
-            try await loadUserData()
+            do {
+                try await loadUserData()
+            } catch {
+                print("DEBUG: Failed to load user data - \(error.localizedDescription)")
+            }
         }
     }
     
     func login(email: String, password: String) async throws {
-        do {
-            let result = try await Auth.auth().signIn(withEmail: email, password: password)
-            await MainActor.run {
-                self.userSession = result.user
-            }
-            try await loadUserData()
-        } catch {
-            print("Failed to log in user: \(error.localizedDescription)")
+        let result = try await Auth.auth().signIn(withEmail: email, password: password)
+        await MainActor.run {
+            self.userSession = result.user
         }
+        try await loadUserData()
     }
     
     func createUser(email: String, password: String, username: String) async throws {
-        do {
-            let result = try await Auth.auth().createUser(withEmail: email, password: password)
-            await MainActor.run {
-                self.userSession = result.user
-            }
-            await uploadUserData(uid: result.user.uid, username: username, email: email)
-        } catch {
-            print("Failed to register user: \(error.localizedDescription)")
+        let result = try await Auth.auth().createUser(withEmail: email, password: password)
+        await MainActor.run {
+            self.userSession = result.user
         }
+        await uploadUserData(uid: result.user.uid, username: username, email: email)
     }
+
     
     func loadUserData() async throws {
         self.userSession = Auth.auth().currentUser
@@ -53,7 +50,7 @@ class AuthService {
         }
     }
     
-    func signoOut() async throws {
+    func signOut() async throws {
         try? Auth.auth().signOut()
         await MainActor.run {
             self.userSession = nil

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CustomEmploye: View {
+struct CustomEmployee: View {
     let name: String
     let description: String
     let image: String
@@ -52,7 +52,7 @@ struct CustomEmploye: View {
 
 
 #Preview {
-    CustomEmploye(name: "Michael", description: "Best barber", image: "barber-1") {
+    CustomEmployee(name: "Michael", description: "Best barber", image: "barber-1") {
         
     }
 }

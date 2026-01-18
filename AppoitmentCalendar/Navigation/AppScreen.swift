@@ -6,13 +6,15 @@ enum AppScreen: Hashable {
     case login
     case addEmail
     case createPassword
+    case userName
+    case phoneNumber
     case completeSignUp
     case home
-    case sevices
-    case choseCut
-    case choseDate
-    case choseTime
-    case cofirmAppointment
+    case services
+    case chooseCut
+    case chooseDate
+    case chooseTime
+    case confirmAppointment
     case profile
     case waitingList
     case aboutApp
@@ -39,6 +41,14 @@ extension AppScreen {
         case .createPassword:
             CreatePasswordView()
                 .environmentObject(registrationViewModel)
+            
+        case .userName:
+            CreateUsernameView()
+                .environmentObject(registrationViewModel)
+            
+        case .phoneNumber:
+            AddPhoneNumber()
+                .environmentObject(registrationViewModel)
 
         case .completeSignUp:
             CompleteSignUpView()
@@ -47,23 +57,23 @@ extension AppScreen {
         case .home:
             HomeView()
 
-        case .sevices:
+        case .services:
             ServicesView()
                 .environmentObject(appointment)
 
-        case .choseCut:
-            ChoseCutView()
+        case .chooseCut:
+            ChooseCutView()
                 .environmentObject(appointment)
 
-        case .choseDate:
+        case .chooseDate:
             ChooseDateView()
                 .environmentObject(appointment)
 
-        case .choseTime:
+        case .chooseTime:
             ChooseTimeView()
                 .environmentObject(appointment)
 
-        case .cofirmAppointment:
+        case .confirmAppointment:
             ConfirmAppointmentView()
                 .environmentObject(appointment)
 

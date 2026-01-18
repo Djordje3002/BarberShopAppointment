@@ -47,7 +47,7 @@ struct HaircutCard: View {
 #Preview {
     HaircutCard(
         option: HaircutOption(
-            name: "Classic Haircut",
+            type: .classic,
             description: "Timeless clean look.",
             imageName: "cut-classic"
         ),
@@ -55,4 +55,3 @@ struct HaircutCard: View {
         action: {}
     )
 }
-

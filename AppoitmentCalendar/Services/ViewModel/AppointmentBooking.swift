@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import FirebaseFirestore
 
+@MainActor
 class AppointmentBooking: ObservableObject {
     
     @Published var selectedCut: HaircutOption?
@@ -12,14 +13,24 @@ class AppointmentBooking: ObservableObject {
     @Published var notes: String = ""
     @Published var barberName: String = ""
     
-    // Save to Firestore
-    func bookAppointment(currentUser: User, completion: @escaping () -> Void = {}) {
-        let db = Firestore.firestore()
-
+    // Error handling and loading state
+    @Published var errorMessage: String?
+    @Published var isLoading: Bool = false
+    
+    // Save to Firestore with async/await
+    func bookAppointment(currentUser: User) async throws {
         guard let selectedCut = selectedCut else {
-            print("❌ No selected cut")
-            return
+            throw AppointmentError.noServiceSelected
         }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        defer {
+            isLoading = false
+        }
+        
+        let db = Firestore.firestore()
 
         let data: [String: Any] = [
             "cutName": selectedCut.name,
@@ -32,22 +43,40 @@ class AppointmentBooking: ObservableObject {
             "timestamp": Timestamp(date: Date())
         ]
 
-        db.collection("appointments").addDocument(data: data) { error in
-            if let error = error {
-                print("❌ Firebase error:", error.localizedDescription)
-            } else {
-                print("✅ Appointment saved with:", data)
-                completion()
-            }
+        do {
+            try await db.collection("appointments").addDocument(data: data)
+            print("✅ Appointment saved successfully")
+        } catch {
+            errorMessage = "Failed to book appointment: \(error.localizedDescription)"
+            print("❌ Firebase error:", error.localizedDescription)
+            throw AppointmentError.bookingFailed(error.localizedDescription)
         }
     }
 
-    // Optional: reset form after booking
+    // Reset form after booking
     func reset() {
+        selectedCut = nil
         selectedDate = Date()
         selectedTime = ""
         customerName = ""
         customerEmail = ""
         notes = ""
+        barberName = ""
+        errorMessage = nil
+    }
+}
+
+// Custom error types for better error handling
+enum AppointmentError: LocalizedError {
+    case noServiceSelected
+    case bookingFailed(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .noServiceSelected:
+            return "Please select a service before booking."
+        case .bookingFailed(let message):
+            return "Booking failed: \(message)"
+        }
     }
 }

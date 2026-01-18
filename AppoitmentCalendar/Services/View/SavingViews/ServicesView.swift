@@ -25,22 +25,22 @@ struct ServicesView: View {
                 .padding(.horizontal)
 
                 VStack {
-                    CustomEmploye(name: "Michael", description: "CEO and barber", image: "barber-1") {
+                    CustomEmployee(name: "Michael", description: "CEO and barber", image: "barber-1") {
                         appointment.barberName = "Michael"
                         print("Barber: \(appointment.barberName)")
-                        router.push(.choseCut)
+                        router.push(.chooseCut)
                     }
-                    CustomEmploye(name: "John", description: "Barber", image: "barber-2") {
+                    CustomEmployee(name: "John", description: "Barber", image: "barber-2") {
                         appointment.barberName = "John"
-                        router.push(.choseCut)
+                        router.push(.chooseCut)
                     }
-                    CustomEmploye(name: "Mirko", description: "Young Barber", image: "barber-0") {
+                    CustomEmployee(name: "Mirko", description: "Young Barber", image: "barber-0") {
                         appointment.barberName = "Mirko"
-                        router.push(.choseCut)
+                        router.push(.chooseCut)
                     }
-                    CustomEmploye(name: "Vukasin", description: "Master Barber", image: "barber-3") {
+                    CustomEmployee(name: "Vukasin", description: "Master Barber", image: "barber-3") {
                         appointment.barberName = "Vukasin"
-                        router.push(.choseCut)
+                        router.push(.chooseCut)
                     }
                 }
                 .padding()

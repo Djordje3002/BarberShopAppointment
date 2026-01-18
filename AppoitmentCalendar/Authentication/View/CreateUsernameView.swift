@@ -11,6 +11,7 @@ struct CreateUsernameView: View {
     @EnvironmentObject var viewModel: RegistrationViewModel
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var registrationViewModel: RegistrationViewModel
+    @EnvironmentObject var router: NavigationRouter
 
     var body: some View {
         VStack(spacing: 12) {
@@ -30,14 +31,13 @@ struct CreateUsernameView: View {
                     .modifier(IGTextFieldModifier())
                     .padding(.top)
             }
-
-            NavigationLink {
-                CreatePasswordView()
-                    .environmentObject(registrationViewModel)
-                    .navigationBarBackButtonHidden(true)
+            
+            Button {
+                router.push(.phoneNumber)
             } label: {
                 Text("Next")
                     .modifier(MainButtonModifier())
+
             }
 
             Spacer()

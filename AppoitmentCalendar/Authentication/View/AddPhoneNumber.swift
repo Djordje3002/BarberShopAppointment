@@ -6,6 +6,9 @@ struct AddPhoneNumber: View {
     @EnvironmentObject var router: NavigationRouter
     @EnvironmentObject var registrationViewModel: RegistrationViewModel
 
+    @State private var showPhoneError = false
+    @State private var phoneErrorMessage = ""
+
     var body: some View {
         VStack(spacing: 12) {
             Text("Add your phone number")
@@ -20,15 +23,26 @@ struct AddPhoneNumber: View {
                     .multilineTextAlignment(.center)
 
                 TextField("Phone Number", text: $viewModel.phoneNumber)
-                    .autocapitalization(.none)
+                    .keyboardType(.numberPad)
                     .modifier(IGTextFieldModifier())
                     .padding(.top)
+
+                if showPhoneError {
+                    Text(phoneErrorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.top, 4)
+                }
             }
-            
-            NavigationLink {
-                CompleteSignUpView()
-                    .environmentObject(registrationViewModel)
-                    .navigationBarBackButtonHidden()
+
+            Button {
+                if isValidPhoneNumber(viewModel.phoneNumber) {
+                    showPhoneError = false
+                    router.push(.completeSignUp)
+                } else {
+                    showPhoneError = true
+                    phoneErrorMessage = "Please enter a valid phone number"
+                }
             } label: {
                 Text("Next")
                     .modifier(MainButtonModifier())
@@ -46,6 +60,12 @@ struct AddPhoneNumber: View {
             }
         }
     }
+
+    /// Basic phone validation (digits only, length 7–15)
+    func isValidPhoneNumber(_ number: String) -> Bool {
+        let phoneRegex = #"^\+?[0-9]{7,15}$"#
+        return number.range(of: phoneRegex, options: .regularExpression) != nil
+    }
 }
 
 #Preview {
@@ -54,5 +74,3 @@ struct AddPhoneNumber: View {
             .environmentObject(RegistrationViewModel())
     }
 }
-
-

@@ -17,7 +17,7 @@ struct ConfirmAppointmentView: View {
 
                 if let user = contentVM.currentUser {
                     Text("Booked by: \(user.username)")
-                    Text("Email: \(user.email)")
+                    Text("Email: \(user.email ?? "Email is not inserted")")
                 } else {
                     Text("Loading user info...")
                         .foregroundColor(.gray)
@@ -27,22 +27,46 @@ struct ConfirmAppointmentView: View {
 
             Spacer()
 
-            Button("Book Now") {
-                if let user = contentVM.currentUser {
-                    appointment.bookAppointment(currentUser: user) {
-                        print("✅ Appointment booked:")
-                        print("Service: \(appointment.selectedCut?.name ?? "Not selected")")
-                        print("Date: \(formattedDate(appointment.selectedDate))")
-                        print("Time: \(appointment.selectedTime)")
-                        print("Price: \(String(format: "%.2f", appointment.selectedCut?.price ?? 0)) €")
-                        print("Booked by: \(user.username)")
-                        print("Email: \(user.email)")
-                        router.popToRoot()
+            if appointment.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            } else {
+                Button("Book Now") {
+                    guard let user = contentVM.currentUser else { return }
+                    Task {
+                        do {
+                            try await appointment.bookAppointment(currentUser: user)
+                            print("✅ Appointment booked:")
+                            print("Service: \(appointment.selectedCut?.name ?? "Not selected")")
+                            print("Date: \(formattedDate(appointment.selectedDate))")
+                            print("Time: \(appointment.selectedTime)")
+                            print("Price: \(String(format: "%.2f", appointment.selectedCut?.price ?? 0)) €")
+                            print("Booked by: \(user.username)")
+                            print("Email: \(user.email ?? "Email is not inserted")")
+                            router.popToRoot()
+                            appointment.reset()
+                        } catch {
+                            // errorMessage is already set inside AppointmentBooking, but you can log here as well
+                            print("❌ Failed to book appointment: \(error.localizedDescription)")
+                        }
                     }
                 }
+                .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
+                .disabled(appointment.selectedCut == nil)
+                .padding()
             }
-            .buttonStyle(.borderedProminent)
-            .padding()
+        }
+        .alert(isPresented: Binding<Bool>(
+            get: { appointment.errorMessage != nil },
+            set: { _ in appointment.errorMessage = nil }
+        )) {
+            Alert(
+                title: Text("Booking Failed"),
+                message: Text(appointment.errorMessage ?? "An unknown error occurred."),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 

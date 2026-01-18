@@ -24,7 +24,7 @@ struct ChooseTimeView: View {
                 .bold()
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                ForEach(times, id: \ .self) { time in
+                ForEach(times, id: \.self) { time in
                     Button(action: {
                         selectedTime = time
                     }) {
@@ -44,8 +44,8 @@ struct ChooseTimeView: View {
             if selectedTime != nil {
                 CustomButton(title: "Confirm") {
                     appointment.selectedTime = selectedTime ?? ""
-                    print("Selected time is \(selectedTime)")
-                    router.push(.cofirmAppointment)
+                    print("Selected time is \(selectedTime ?? "nil")")
+                    router.push(.confirmAppointment)
                 }
                 .padding()
             }

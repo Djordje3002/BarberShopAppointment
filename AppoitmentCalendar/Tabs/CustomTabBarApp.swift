@@ -31,5 +31,7 @@ struct CustomTabBarApp: View {
 }
 
 #Preview {
-    CustomTabBarApp()
+    NavigationStack {
+        CustomTabBarApp()
+    }
 }
