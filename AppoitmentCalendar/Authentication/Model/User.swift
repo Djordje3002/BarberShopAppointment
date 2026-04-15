@@ -1,94 +1,74 @@
-//
-//  User.swift
-//  InstagramTutorial
-//
-//  Created by Djordje on 24. 6. 2025..
-//
-
 import Foundation
-import Firebase
-import FirebaseAuth
 
-struct User: Identifiable, Codable, Hashable {
+enum UserRole: String, Codable {
+    case client
+    case barber
+}
+
+struct User: Identifiable, Codable {
     let id: String
-    var username: String
-    var profileImageUrl: String?
-    var fullName: String?
-//    var bio: String?
+    let username: String
     let email: String?
-    
-    var isCurrentUser: Bool {
-        guard let currentUid = Auth.auth().currentUser?.uid else { return false }
-        return currentUid == id
+    let role: UserRole
+    let barberId: String?
+
+    init(
+        id: String,
+        username: String,
+        email: String?,
+        role: UserRole = .client,
+        barberId: String? = nil
+    ) {
+        self.id = id
+        self.username = username
+        self.email = email
+        self.role = role
+        self.barberId = barberId
+    }
+
+    var isBarber: Bool {
+        role == .barber
+    }
+
+    var resolvedBarberId: String? {
+        let cleanedBarberId = barberId?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !cleanedBarberId.isEmpty {
+            return Self.normalizedBarberId(from: cleanedBarberId)
+        }
+        guard isBarber else { return nil }
+        return Self.normalizedBarberId(from: username)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case username
+        case email
+        case role
+        case barberId
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        username = try container.decode(String.self, forKey: .username)
+        email = try container.decodeIfPresent(String.self, forKey: .email)
+
+        if let rawRole = try container.decodeIfPresent(String.self, forKey: .role)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased(),
+           let decodedRole = UserRole(rawValue: rawRole) {
+            role = decodedRole
+        } else {
+            role = .client
+        }
+
+        barberId = try container.decodeIfPresent(String.self, forKey: .barberId)
+    }
+
+    private static func normalizedBarberId(from value: String) -> String {
+        value
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "-")
     }
 }
-
-extension User {
-    static var MOCK_USERS: [User] = [
-        .init(
-            id: UUID().uuidString,
-            username: "kingjames",
-            profileImageUrl: "Lebron",
-            fullName: "LeBron James",
-//            bio: "4x NBA Champion. Strive for greatness.",
-            email: "lebron@lakers.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "photo1",
-            profileImageUrl: "photo1",
-            fullName: "Stephen Curry",
-//            bio: "Chef Curry with the shot.",
-            email: "steph@warriors.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "photo1",
-            profileImageUrl: "photo2",
-            fullName: "Giannis Antetokounmpo",
-//            bio: "The Greek Freak 🇬🇷 MVP x2.",
-            email: "giannis@bucks.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "kdsniper",
-            profileImageUrl: "photo3",
-            fullName: "Kevin Durant",
-//            bio: "Easy Money Sniper. Just hoop.",
-            email: "kd@suns.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "luka77",
-            profileImageUrl: "photo4",
-            fullName: "Luka Dončić",
-//            bio: "From Slovenia with love 🇸🇮.",
-            email: "luka@mavs.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "jokic15",
-            profileImageUrl: "Jokic",
-            fullName: "Nikola Jokić",
-//            bio: "Joker. MVP & NBA Champ.",
-            email: "jokic@nuggets.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "booker1",
-            profileImageUrl: "photo5",
-            fullName: "Devin Booker",
-//            bio: "Buckets. Suns lifer.",
-            email: "book@phoenixsuns.com"
-        ),
-        .init(
-            id: UUID().uuidString,
-            username: "jaytatum0",
-            profileImageUrl: "photo6",
-            fullName: "Jayson Tatum",
-//            bio: "0 on my back. 100 in my heart.",
-            email: "jt@celtics.com"
-        )
-    ]
-}
-

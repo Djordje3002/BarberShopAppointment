@@ -59,7 +59,13 @@ class AuthService {
     }
     
     private func uploadUserData(uid: String, username: String, email: String) async {
-        let user = User(id: uid, username: username, email: email)
+        let user = User(
+            id: uid,
+            username: username,
+            email: email,
+            role: .client,
+            barberId: nil
+        )
         await MainActor.run {
             self.currentUser = user
         }
@@ -68,4 +74,3 @@ class AuthService {
         try? await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
     }
 }
-

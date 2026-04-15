@@ -1,10 +1,3 @@
-//
-//  ReviewCard.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 31. 7. 2025..
-//
-
 import SwiftUI
 
 struct ReviewCard: View {
@@ -13,36 +6,26 @@ struct ReviewCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(review.name)
+                Text(review.author)
                     .font(.headline)
                 Spacer()
+                Text(String(repeating: "*", count: review.rating))
+                    .foregroundStyle(.yellow)
             }
-
-            Text(review.comment)
-                .font(.body)
-                .foregroundColor(.black)
-
-            Text(review.timestamp, style: .date)
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            HStack(spacing: 2) {
-                ForEach(0..<5, id: \.self) { index in
-                    Image(systemName: index < review.rating ? "star.fill" : "star.fill")
-                        .foregroundColor(index < review.rating ? .yellow : .gray.opacity(0.4))
-                }
-            }
+            Text(review.message)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
         .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 3)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 }
 
 #Preview {
-    ReviewCard(review: Review(id: "1", name: "Alice", comment: "Great experience!", rating: 5, timestamp: Date()))
+    ReviewCard(review: Review(author: "Mark", message: "Great fade and very friendly team.", rating: 5))
         .padding()
 }
-
-

@@ -9,7 +9,7 @@ struct CustomTabBarApp: View {
                 HomeView()
                     .tag(Tab.home)
                     .toolbar(.hidden, for: .tabBar)
-                ServicesView()
+                ChooseBarberView()
                     .tag(Tab.services)
                     .toolbar(.hidden, for: .tabBar)
                 AppointmentView()

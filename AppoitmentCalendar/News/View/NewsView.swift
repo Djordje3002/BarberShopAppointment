@@ -1,69 +1,80 @@
-//
-//  NewsView.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 29. 7. 2025..
-//
-
 import SwiftUI
 
 struct NewsView: View {
     @StateObject private var viewModel = NewsViewModel()
 
     var body: some View {
-        VStack {
-            navigation
+        VStack(spacing: 0) {
+            // Custom Header
+            HStack {
+                Text("News & Updates")
+                    .font(.title.bold())
+                Spacer()
+            }
+            .padding()
+            .background(Color(UIColor.systemBackground))
+
             ScrollView {
-                VStack {
-                    
-                    ScrollView {
-                        title
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.news) { item in
-                                NewsCard(news: item)
-                            }
+                VStack(spacing: 20) {
+                    ForEach(viewModel.items) { item in
+                        NavigationLink {
+                            NewsDetailView(item: item)
+                        } label: {
+                            NewsCard(item: item)
+                                .foregroundColor(.primary)
                         }
-                        .padding()
                     }
                 }
-                .padding(.bottom, 130)
+                .padding()
             }
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color(UIColor.systemGroupedBackground))
     }
 }
 
+struct NewsDetailView: View {
+    let item: NewsModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if let imageName = item.imageName {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 250)
+                        .clipped()
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(item.date, style: .date)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    Text(item.title)
+                        .font(.title)
+                        .fontWeight(.bold)
+
+                    Divider()
+
+                    Text(item.subtitle)
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+
+                    Text(item.content)
+                        .font(.body)
+                        .lineSpacing(6)
+                }
+                .padding(.horizontal)
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
 
 #Preview {
-    NewsView()
-}
-
-extension NewsView {
-    var navigation: some View {
-        HStack(spacing: 0) {
-                Text("News")
-                    .font(.title2.bold())
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color.white)
-        .foregroundColor(.black)
-        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .padding(.bottom)
-    }
-    
-    var title: some View {
-        VStack(alignment: .leading) {
-            Text("All the latest updates, right here.")
-                .font(.system(size: 28, weight: .semibold))
-                .foregroundColor(.black)
-                .padding(.vertical, 20)
-                .padding(.horizontal)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 6)
-        .padding(.horizontal)
+    NavigationStack {
+        NewsView()
     }
 }

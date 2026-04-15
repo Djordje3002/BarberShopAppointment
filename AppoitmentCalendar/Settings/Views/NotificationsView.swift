@@ -1,23 +1,20 @@
-//
-//  NotificationsView.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 30. 7. 2025..
-//
-
 import SwiftUI
 
 struct NotificationsView: View {
+    @State private var bookingReminders = true
+    @State private var promoNotifications = false
+
     var body: some View {
-        VStack {
-            CustomNavBar(title: "Notifications")
-            
-            Spacer()
+        Form {
+            Toggle("Booking reminders", isOn: $bookingReminders)
+            Toggle("Promotions and updates", isOn: $promoNotifications)
         }
-        .navigationBarBackButtonHidden()
+        .navigationTitle("Notifications")
     }
 }
 
 #Preview {
-    NotificationsView()
+    NavigationStack {
+        NotificationsView()
+    }
 }

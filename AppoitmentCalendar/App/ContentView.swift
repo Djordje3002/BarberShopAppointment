@@ -10,8 +10,12 @@ struct ContentView: View {
                     LoginView()
                         .environmentObject(viewModelProvider.authViewModel)
                         .environmentObject(viewModelProvider.registrationViewModel)
-                } else if viewModelProvider.contentViewModel.currentUser != nil {
-                    CustomTabBarApp()
+                } else if let currentUser = viewModelProvider.contentViewModel.currentUser {
+                    if currentUser.isBarber {
+                        BarberDashboardView()
+                    } else {
+                        CustomTabBarApp()
+                    }
                 } else {
                     ProgressView("Loading...")
                 }
@@ -35,4 +39,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-

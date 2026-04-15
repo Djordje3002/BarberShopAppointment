@@ -1,46 +1,51 @@
-//
-//  SettingsRow.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 30. 7. 2025..
-//
-
 import SwiftUI
 
 struct SettingsRow: View {
     let text: String
     let icon: String
+    let iconColor: Color
     let action: () -> Void
+    
+    init(text: String, icon: String, iconColor: Color = .black, action: @escaping () -> Void) {
+        self.text = text
+        self.icon = icon
+        self.iconColor = iconColor
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.black)
-
+            HStack(spacing: 16) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(iconColor.opacity(0.1))
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(iconColor)
+                }
+                
                 Text(text)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
-
+                    .font(.body.weight(.medium))
+                
                 Spacer()
-
+                
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.tertiary)
             }
             .padding()
-            .background(.ultraThinMaterial)
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 3)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(UIColor.secondarySystemBackground))
+            )
         }
-        .padding(.horizontal, 4)
+        .buttonStyle(.plain)
     }
 }
 
-
 #Preview {
-    SettingsRow(text: "Test", icon: "person.circle", action: {
-        
-    })
+    SettingsRow(text: "Privacy", icon: "lock.shield.fill", iconColor: .blue, action: {})
+        .padding()
 }

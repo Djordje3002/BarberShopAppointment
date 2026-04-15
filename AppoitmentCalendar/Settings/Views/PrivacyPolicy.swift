@@ -1,23 +1,15 @@
-//
-//  PrivacyPolicy.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 30. 7. 2025..
-//
-
 import SwiftUI
 
-struct PrivacyPolicy: View {
+struct PrivacyPolicyView: View {
     var body: some View {
-        VStack {
-            CustomNavBar(title: "Privacy and Policy")
-            
-            Spacer()
+        ScrollView {
+            Text("We store only the data required to authenticate users and manage appointments. Contact the shop to request data removal.")
+                .padding()
         }
-        .navigationBarBackButtonHidden()
+        .navigationTitle("Privacy Policy")
     }
 }
 
 #Preview {
-    PrivacyPolicy()
+    PrivacyPolicyView()
 }

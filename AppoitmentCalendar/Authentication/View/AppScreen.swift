@@ -3,13 +3,19 @@ import SwiftUI
 // Route type for NavigationStack
 enum AppScreen: Hashable {
     // Authentication / registration flow
+    case addEmail
     case createPassword
+    case userName
+    case phoneNumber
     case completeSignUp
 
     // Main app routes
     case home
+    case chooseBarber
     case services
+    case chooseDate
     case chooseTime
+    case confirmAppointment
     case profile
     case waitingList
     case aboutApp
@@ -25,8 +31,20 @@ extension AppScreen {
         registrationViewModel: RegistrationViewModel
     ) -> some View {
         switch self {
+        case .addEmail:
+            AddEmailView()
+                .environmentObject(registrationViewModel)
+
         case .createPassword:
             CreatePasswordView()
+                .environmentObject(registrationViewModel)
+
+        case .userName:
+            CreateUsernameView()
+                .environmentObject(registrationViewModel)
+
+        case .phoneNumber:
+            AddPhoneNumber()
                 .environmentObject(registrationViewModel)
 
         case .completeSignUp:
@@ -36,18 +54,29 @@ extension AppScreen {
         case .home:
             CustomTabBarApp()
 
+        case .chooseBarber:
+            ChooseBarberView()
+
         case .services:
             ServicesView()
 
+        case .chooseDate:
+            ChooseDateView()
+                .environmentObject(appointment)
+
         case .chooseTime:
             ChooseTimeView()
+                .environmentObject(appointment)
+
+        case .confirmAppointment:
+            ConfirmAppointmentView()
                 .environmentObject(appointment)
 
         case .profile:
             ProfileView()
 
         case .waitingList:
-            WaitingListView()
+            WaitListView()
 
         case .aboutApp:
             AboutAppView()

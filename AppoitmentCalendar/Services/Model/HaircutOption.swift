@@ -1,22 +1,11 @@
 import Foundation
 
-struct HaircutOption: Identifiable, Hashable {
-    let id = UUID()
+struct HaircutOption: Identifiable, Hashable, Codable {
+    let type: HaircutType
     let description: String
     let imageName: String
-    let haircutType: HaircutType
 
-    var name: String {
-        haircutType.rawValue
-    }
-
-    var price: Double {
-        haircutType.price
-    }
-    
-    init(type: HaircutType, description: String, imageName: String) {
-        self.haircutType = type
-        self.description = description
-        self.imageName = imageName
-    }
+    var id: String { type.rawValue }
+    var name: String { type.displayName }
+    var price: Double { type.price }
 }

@@ -4,69 +4,76 @@ struct ServicesView: View {
     @EnvironmentObject var router: NavigationRouter
     @EnvironmentObject var appointment: AppointmentBooking
 
-    var body: some View {
-        ScrollView {
-            VStack {
-                picture
-                    .frame(maxWidth: .infinity)
-                    .ignoresSafeArea(edges: .top)
+    private let options: [HaircutOption] = [
+        HaircutOption(type: .classic, description: "Neat and timeless everyday style.", imageName: "barber-1"),
+        HaircutOption(type: .fade, description: "Clean fade with modern finishing.", imageName: "barber-2"),
+        HaircutOption(type: .beardTrim, description: "Precise shape-up and beard lineup.", imageName: "barber-3"),
+        HaircutOption(type: .kidsCut, description: "Fast and comfortable cut for kids.", imageName: "barber-0")
+    ]
 
-                VStack(alignment: .leading) {
-                    Text("Choose barber for your next cut")
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.black)
-                        .padding(.vertical, 20)
-                        .padding(.horizontal)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white)
-                .cornerRadius(20)
-                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 6)
+    var body: some View {
+        VStack(spacing: 14) {
+            CustomNavBar(title: "Choose Haircut")
+
+            Text("Step 2 of 5: Select your haircut")
+                .font(.headline)
                 .padding(.horizontal)
 
-                VStack {
-                    CustomEmployee(name: "Michael", description: "CEO and barber", image: "barber-1") {
-                        appointment.barberName = "Michael"
-                        print("Barber: \(appointment.barberName)")
-                        router.push(.chooseCut)
-                    }
-                    CustomEmployee(name: "John", description: "Barber", image: "barber-2") {
-                        appointment.barberName = "John"
-                        router.push(.chooseCut)
-                    }
-                    CustomEmployee(name: "Mirko", description: "Young Barber", image: "barber-0") {
-                        appointment.barberName = "Mirko"
-                        router.push(.chooseCut)
-                    }
-                    CustomEmployee(name: "Vukasin", description: "Master Barber", image: "barber-3") {
-                        appointment.barberName = "Vukasin"
-                        router.push(.chooseCut)
+            if appointment.barberName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                VStack(spacing: 12) {
+                    Text("Please select a barber first.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    CustomButton(title: "Go To Choose Barber") {
+                        router.push(.chooseBarber)
                     }
                 }
-                .padding()
-                .padding(.bottom, 130)
+                Spacer()
+            } else {
+                HStack {
+                    Text("Barber: \(appointment.barberName)")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Button("Change") {
+                        router.push(.chooseBarber)
+                    }
+                    .font(.subheadline)
+                }
+                .padding(.horizontal)
+
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(options) { option in
+                            HaircutCard(
+                                option: option,
+                                isSelected: appointment.selectedCut?.id == option.id,
+                                action: {
+                                    appointment.selectedCut = option
+                                }
+                            )
+                        }
+                    }
+                    .padding(.top, 2)
+                    .padding(.bottom, 100)
+                }
+
+                CustomButton(title: "Choose Date") {
+                    router.push(.chooseDate)
+                }
+                .disabled(appointment.selectedCut == nil)
+                .opacity(appointment.selectedCut == nil ? 0.5 : 1)
+                .padding(.bottom, 8)
             }
         }
-        .ignoresSafeArea()
-    }
-}
-
-extension ServicesView {
-    private var picture: some View {
-        Image("barber-0")
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(maxWidth: .infinity)
-            .background(Color.black.opacity(0.3))
-            .overlay(
-                LinearGradient(gradient: Gradient(colors: [.black.opacity(0.6), .clear]), startPoint: .top, endPoint: .bottom)
-            )
-            .clipped()
+        .navigationBarBackButtonHidden()
     }
 }
 
 #Preview {
-    ServicesView()
-        .environmentObject(NavigationRouter())
-        .environmentObject(AppointmentBooking())
+    NavigationStack {
+        ServicesView()
+            .environmentObject(NavigationRouter())
+            .environmentObject(AppointmentBooking())
+    }
 }

@@ -6,7 +6,13 @@ struct RouterView: View {
 
     var body: some View {
         NavigationStack(path: $provider.router.path) {
-            CustomTabBarApp()
+            Group {
+                if provider.contentViewModel.currentUser?.isBarber == true {
+                    BarberDashboardView()
+                } else {
+                    CustomTabBarApp()
+                }
+            }
                 .navigationDestination(for: AppScreen.self) {
                     $0.destinationView(
                         appointment: provider.appointment,

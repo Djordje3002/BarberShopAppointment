@@ -1,43 +1,29 @@
-//
-//  SettingsView.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 29. 7. 2025..
-//
-
 import SwiftUI
 
 struct ProfileView: View {
+    @EnvironmentObject var contentVM: ContentViewModel
+
     var body: some View {
-        VStack {
-            CustomNavBar(title: "Profile")
-            userInfo
-            
+        VStack(spacing: 20) {
+            Image(systemName: "person.crop.circle.fill")
+                .font(.system(size: 72))
+                .foregroundStyle(.blue)
+
+            Text(contentVM.currentUser?.username ?? "Guest")
+                .font(.title2.bold())
+
+            Text(contentVM.currentUser?.email ?? "No email available")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
             Spacer()
         }
-        .navigationBarBackButtonHidden()
+        .padding()
+        .navigationTitle("Profile")
     }
 }
 
 #Preview {
     ProfileView()
-}
-
-
-extension ProfileView {
-        private var userInfo: some View {
-            VStack {
-                Image("pearson-image")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 128, height: 128)
-                    .clipShape(RoundedRectangle(cornerRadius: 64))
-    
-                Text("User Profile")
-                    .font(.largeTitle)
-                    .bold()
-            }
-        }
-    
-    
+        .environmentObject(ContentViewModel())
 }

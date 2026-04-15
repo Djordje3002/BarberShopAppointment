@@ -24,8 +24,12 @@ private struct AuthFlow: View {
                     LoginView()
                         .environmentObject(provider.authViewModel)
                         .environmentObject(provider.registrationViewModel)
-                } else if contentVM.currentUser != nil {
-                    CustomTabBarApp()
+                } else if let currentUser = contentVM.currentUser {
+                    if currentUser.isBarber {
+                        BarberDashboardView()
+                    } else {
+                        CustomTabBarApp()
+                    }
                 } else {
                     ProgressView("Loading...")
                 }
