@@ -29,3 +29,25 @@ enum BarberDirectory {
             .replacingOccurrences(of: " ", with: "-")
     }
 }
+
+struct BarberSeedAccount: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let barberId: String
+    let email: String
+    let password: String
+}
+
+enum BarberSeedCatalog {
+    static let defaultPassword = "Barber#2026!"
+
+    static let accounts: [BarberSeedAccount] = BarberDirectory.featured.map { barber in
+        BarberSeedAccount(
+            id: barber.id,
+            name: barber.name,
+            barberId: barber.id,
+            email: "\(barber.id)@barberapp.com",
+            password: defaultPassword
+        )
+    }
+}

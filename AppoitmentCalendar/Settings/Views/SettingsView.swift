@@ -40,6 +40,10 @@ struct SettingsView: View {
                         router.push(.privacyPolicy)
                     }
 
+                    SettingsRow(text: "Barber Accounts", icon: "person.3.fill") {
+                        router.push(.seedBarberAccounts)
+                    }
+
                     SettingsRow(
                         text: "Log Out",
                         icon: "arrow.backward.square.fill",

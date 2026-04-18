@@ -21,6 +21,7 @@ enum AppScreen: Hashable {
     case aboutApp
     case notifications
     case privacyPolicy
+    case seedBarberAccounts
 }
 
 // Centralized destination builder used in AuthRootView/ContentView
@@ -86,6 +87,9 @@ extension AppScreen {
 
         case .privacyPolicy:
             PrivacyPolicyView()
+
+        case .seedBarberAccounts:
+            SeedBarberAccountsView()
         }
     }
 }
