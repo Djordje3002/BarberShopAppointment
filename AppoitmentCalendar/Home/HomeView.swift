@@ -162,7 +162,7 @@ extension HomeView {
                 ForEach(0..<5) { _ in
                     Image(systemName: "star.fill")
                         .foregroundColor(.yellow)
-                        .font(.title3)
+                        .font(.title2.weight(.bold))
                 }
                 Text("5.0")
                     .font(.headline)
