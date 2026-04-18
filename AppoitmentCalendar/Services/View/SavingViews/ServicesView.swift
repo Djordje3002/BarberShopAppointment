@@ -12,61 +12,110 @@ struct ServicesView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 14) {
-            CustomNavBar(title: "Choose Haircut")
+        ZStack {
+            BookingScreenBackground()
 
-            Text("Step 2 of 5: Select your haircut")
-                .font(.headline)
+            VStack(spacing: 14) {
+                CustomNavBar(title: "Choose Haircut")
+
+                BookingStepHeader(
+                    step: 2,
+                    total: 5,
+                    title: "Pick Your Service",
+                    subtitle: "Select the haircut package for your appointment."
+                )
                 .padding(.horizontal)
+                .bookingEntrance(delay: 0.03)
 
-            if appointment.barberName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                VStack(spacing: 12) {
-                    Text("Please select a barber first.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    CustomButton(title: "Go To Choose Barber") {
-                        router.push(.chooseBarber)
-                    }
-                }
-                Spacer()
-            } else {
-                HStack {
-                    Text("Barber: \(appointment.barberName)")
-                        .font(.subheadline.weight(.semibold))
+                if appointment.barberName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    missingBarberState
+                        .bookingEntrance(delay: 0.10)
                     Spacer()
-                    Button("Change") {
-                        router.push(.chooseBarber)
-                    }
-                    .font(.subheadline)
-                }
-                .padding(.horizontal)
+                } else {
+                    selectedBarberCard
+                        .bookingEntrance(delay: 0.08)
 
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(options) { option in
-                            HaircutCard(
-                                option: option,
-                                isSelected: appointment.selectedCut?.id == option.id,
-                                action: {
-                                    appointment.selectedCut = option
-                                }
-                            )
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
+                                HaircutCard(
+                                    option: option,
+                                    isSelected: appointment.selectedCut?.id == option.id,
+                                    action: {
+                                        withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) {
+                                            appointment.selectedCut = option
+                                        }
+                                    }
+                                )
+                                .bookingEntrance(delay: 0.12 + (Double(index) * 0.035))
+                            }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom, 120)
                     }
-                    .padding(.top, 2)
-                    .padding(.bottom, 100)
                 }
-
-                CustomButton(title: "Choose Date") {
-                    router.push(.chooseDate)
-                }
-                .disabled(appointment.selectedCut == nil)
-                .opacity(appointment.selectedCut == nil ? 0.5 : 1)
-                .padding(.bottom, 8)
             }
         }
         .navigationBarBackButtonHidden()
+        .safeAreaInset(edge: .bottom) {
+            if !appointment.barberName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                let isDisabled = appointment.selectedCut == nil
+
+                VStack(spacing: 10) {
+                    Button {
+                        router.push(.chooseDate)
+                    } label: {
+                        Text("Choose Date")
+                    }
+                    .buttonStyle(BookingCTAButtonStyle(isDisabled: isDisabled))
+                    .disabled(isDisabled)
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 10)
+                .background(.ultraThinMaterial)
+            }
+        }
+    }
+
+    private var selectedBarberCard: some View {
+        HStack(spacing: 8) {
+            Label("Barber: \(appointment.barberName)", systemImage: "person.crop.circle")
+                .font(BookingTheme.body(15, weight: .semibold))
+                .foregroundStyle(BookingTheme.titleColor)
+
+            Spacer()
+
+            Button("Change") {
+                router.push(.chooseBarber)
+            }
+            .font(BookingTheme.body(14, weight: .bold))
+            .foregroundStyle(BookingTheme.accent)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(BookingTheme.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(BookingTheme.surfaceBorder, lineWidth: 1)
+        )
+        .padding(.horizontal)
+    }
+
+    private var missingBarberState: some View {
+        VStack(spacing: 12) {
+            Text("Please select a barber first.")
+                .font(BookingTheme.body(15, weight: .semibold))
+                .foregroundStyle(BookingTheme.subtitleColor)
+
+            CustomButton(title: "Go To Choose Barber") {
+                router.push(.chooseBarber)
+            }
+        }
+        .padding()
     }
 }
 

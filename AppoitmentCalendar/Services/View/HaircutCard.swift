@@ -1,46 +1,54 @@
-//
-//  HaircutCard.swift
-//  AppoitmentCalendar
-//
-//  Created by Djordje on 31. 7. 2025..
-//
-
 import SwiftUI
 
 struct HaircutCard: View {
     let option: HaircutOption
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack {
+            HStack(spacing: 14) {
                 Image(option.imageName)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 80, height: 80)
-                    .clipped()
-                    .cornerRadius(12)
-                
-                VStack(alignment: .leading) {
+                    .frame(width: 82, height: 82)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 6) {
                     Text(option.name)
-                        .font(.headline)
+                        .font(BookingTheme.body(20, weight: .bold))
+                        .foregroundStyle(BookingTheme.titleColor)
+
                     Text(option.description)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .font(BookingTheme.body(14, weight: .regular))
+                        .foregroundStyle(BookingTheme.subtitleColor)
+                        .lineLimit(2)
+
+                    Text(String(format: "%.2f EUR", option.price))
+                        .font(BookingTheme.body(14, weight: .bold))
+                        .foregroundStyle(BookingTheme.accent)
                 }
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .padding()
+
+                Spacer(minLength: 12)
+
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? BookingTheme.accent : BookingTheme.subtitleColor)
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(BookingTheme.surface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(isSelected ? BookingTheme.accent : BookingTheme.surfaceBorder, lineWidth: isSelected ? 2 : 1)
+            )
+            .shadow(color: BookingTheme.accent.opacity(isSelected ? 0.11 : 0.05), radius: 10, x: 0, y: 5)
+            .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
-        .buttonStyle(PlainButtonStyle())
-        .padding(.horizontal)
+        .buttonStyle(.plain)
     }
 }
 
@@ -49,9 +57,10 @@ struct HaircutCard: View {
         option: HaircutOption(
             type: .classic,
             description: "Timeless clean look.",
-            imageName: "cut-classic"
+            imageName: "barber-1"
         ),
         isSelected: true,
         action: {}
     )
+    .padding()
 }

@@ -7,90 +7,139 @@ struct ChooseDateView: View {
     @State private var selectedMonthOffset = 0
     @State private var selectedDate: Date? = nil
 
-    let daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    private let daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     var body: some View {
-        VStack {
-            CustomNavBar(title: "Choose a date")
-            ScrollView {
-                VStack(spacing: 20) {
-                    Text("Select a day for your appointment")
-                        .font(.title2)
-                        .bold()
+        ZStack {
+            BookingScreenBackground()
 
+            VStack(spacing: 14) {
+                CustomNavBar(title: "Choose Date")
+
+                BookingStepHeader(
+                    step: 3,
+                    total: 5,
+                    title: "Choose Appointment Date",
+                    subtitle: "Past days are disabled automatically."
+                )
+                .padding(.horizontal)
+                .bookingEntrance(delay: 0.03)
+
+                VStack(spacing: 14) {
                     monthSelector
                     weekDays
                     dateGrid
-
-                    if selectedDate != nil {
-                        CustomButton(title: "Next") {
-                            if let selected = selectedDate {
-                                appointment.selectedDate = selected
-                                print("Selected date is: \(selected)")
-                                router.push(.chooseTime)
-                            }
-                        }
-                    }
                 }
                 .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(BookingTheme.surface)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(BookingTheme.surfaceBorder, lineWidth: 1)
+                )
+                .padding(.horizontal)
+                .shadow(color: BookingTheme.accent.opacity(0.08), radius: 10, x: 0, y: 6)
+                .bookingEntrance(delay: 0.10)
+
+                Spacer(minLength: 0)
             }
         }
         .navigationBarBackButtonHidden()
+        .safeAreaInset(edge: .bottom) {
+            let isDisabled = selectedDate == nil
+
+            VStack(spacing: 10) {
+                Button {
+                    guard let selectedDate else { return }
+                    withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) {
+                        appointment.selectedDate = selectedDate
+                    }
+                    router.push(.chooseTime)
+                } label: {
+                    Text("Continue To Time")
+                }
+                .buttonStyle(BookingCTAButtonStyle(isDisabled: isDisabled))
+                .disabled(isDisabled)
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
+            .background(.ultraThinMaterial)
+        }
+        .onAppear {
+            let currentSelection = appointment.selectedDate
+            if Calendar.current.startOfDay(for: currentSelection) >= Calendar.current.startOfDay(for: Date()) {
+                selectedDate = currentSelection
+            }
+        }
     }
 
-    // MARK: - Month Selector View
     private var monthSelector: some View {
         HStack {
             Button(action: { selectedMonthOffset -= 1 }) {
                 Image(systemName: "chevron.left")
+                    .font(.headline)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(BookingTheme.accent.opacity(0.14)))
+                    .foregroundStyle(BookingTheme.accent)
             }
+
             Spacer()
+
             Text(monthTitle())
-                .font(.headline)
+                .font(BookingTheme.body(18, weight: .bold))
+                .foregroundStyle(BookingTheme.titleColor)
+
             Spacer()
+
             Button(action: { selectedMonthOffset += 1 }) {
                 Image(systemName: "chevron.right")
+                    .font(.headline)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(BookingTheme.accent.opacity(0.14)))
+                    .foregroundStyle(BookingTheme.accent)
             }
         }
     }
 
-    // MARK: - Week Days Header
     private var weekDays: some View {
         HStack {
             ForEach(daysOfWeek, id: \.self) { day in
                 Text(day)
-                    .font(.subheadline)
+                    .font(BookingTheme.body(13, weight: .bold))
+                    .foregroundStyle(BookingTheme.subtitleColor)
                     .frame(maxWidth: .infinity)
             }
         }
     }
 
-    // MARK: - Calendar Grid
     private var dateGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
             ForEach(fetchDates()) { calendarDate in
                 if calendarDate.day == 0 {
-                    Text("")
-                        .frame(minHeight: 40)
+                    Color.clear
+                        .frame(height: 42)
                 } else {
-                    Button(action: {
+                    let isSelected = selectedDate?.isSameDay(as: calendarDate.date) == true
+
+                    Button {
                         if calendarDate.isEnabled {
-                            selectedDate = calendarDate.date
+                            withAnimation(.easeInOut(duration: 0.20)) {
+                                selectedDate = calendarDate.date
+                            }
                         }
-                    }) {
+                    } label: {
                         Text("\(calendarDate.day)")
-                            .frame(maxWidth: .infinity, minHeight: 40)
-                            .padding(8)
+                            .font(BookingTheme.body(14, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 42)
                             .background(
-                                Circle().fill(
-                                    selectedDate?.isSameDay(as: calendarDate.date) == true ? Color.blue : Color.clear
-                                )
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(dateBackgroundColor(isSelected: isSelected, isEnabled: calendarDate.isEnabled))
                             )
-                            .foregroundColor(
-                                calendarDate.isEnabled
-                                    ? (selectedDate?.isSameDay(as: calendarDate.date) == true ? .white : .primary)
-                                    : .gray
-                            )
+                            .foregroundStyle(dateTextColor(isSelected: isSelected, isEnabled: calendarDate.isEnabled))
                     }
                     .disabled(!calendarDate.isEnabled)
                 }
@@ -98,7 +147,18 @@ struct ChooseDateView: View {
         }
     }
 
-    // MARK: - Helpers
+    private func dateBackgroundColor(isSelected: Bool, isEnabled: Bool) -> Color {
+        if !isEnabled { return Color.gray.opacity(0.18) }
+        if isSelected { return BookingTheme.accent }
+        return Color.white.opacity(0.65)
+    }
+
+    private func dateTextColor(isSelected: Bool, isEnabled: Bool) -> Color {
+        if !isEnabled { return .gray }
+        if isSelected { return .white }
+        return BookingTheme.titleColor
+    }
+
     private func fetchDates() -> [CalendarDate] {
         let calendar = Calendar.current
         let monthStart = calendar.date(byAdding: .month, value: selectedMonthOffset, to: Date()) ?? Date()
@@ -130,14 +190,12 @@ struct ChooseDateView: View {
     }
 }
 
-// ✅ REQUIRED extension for isSameDay comparison
 extension Date {
     func isSameDay(as other: Date) -> Bool {
         Calendar.current.isDate(self, inSameDayAs: other)
     }
 }
 
-// ✅ Dummy preview — only works if you inject environment objects
 #Preview {
     ChooseDateView()
         .environmentObject(AppointmentBooking())
