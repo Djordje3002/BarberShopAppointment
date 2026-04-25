@@ -10,45 +10,57 @@ import SwiftUI
 struct CreateUsernameView: View {
     @EnvironmentObject var viewModel: RegistrationViewModel
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var registrationViewModel: RegistrationViewModel
     @EnvironmentObject var router: NavigationRouter
 
     var body: some View {
-        VStack(spacing: 12) {
-            Text("Create username")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.top)
+        VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Pick a username")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Text("This is how you'll be identified in the shop.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 40)
 
-            VStack {
-                Text("Choose a username for your account")
-                    .font(.footnote)
-                    .foregroundStyle(.gray)
-                    .multilineTextAlignment(.center)
-
-                TextField("Username", text: $viewModel.username)
+            // Input
+            VStack(spacing: 16) {
+                CustomTextField(iconName: "person", placeholder: "Username", text: $viewModel.username)
                     .autocapitalization(.none)
-                    .modifier(IGTextFieldModifier())
-                    .padding(.top)
             }
             
+            // Next Button
             Button {
                 router.push(.phoneNumber)
             } label: {
-                Text("Next")
-                    .modifier(MainButtonModifier())
-
+                Text("Continue")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.primary)
+                    )
+                    .padding(.horizontal)
             }
 
             Spacer()
         }
+        .background(Color(.systemBackground))
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Image(systemName: "chevron.left")
-                    .imageScale(.large)
-                    .onTapGesture {
-                        dismiss()
-                    }
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                }
             }
         }
     }

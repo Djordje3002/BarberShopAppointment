@@ -4,39 +4,40 @@ struct CreatePasswordView: View {
     @EnvironmentObject var viewModel: RegistrationViewModel
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var router: NavigationRouter
-    @EnvironmentObject var registrationViewModel: RegistrationViewModel
 
     @State private var showPasswordError = false
     @State private var passwordErrorMessage = ""
 
     var body: some View {
-        VStack(spacing: 12) {
-            Text("Create password")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.top)
-
-            VStack {
-                Text("Your password must be at least 6 characters long")
-                    .font(.footnote)
-                    .foregroundStyle(.gray)
+        VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Secure your account")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Text("Choose a strong password with at least 6 characters.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
+            }
+            .padding(.top, 40)
 
-                SecureField("Password", text: $viewModel.password)
+            // Input
+            VStack(alignment: .leading, spacing: 12) {
+                CustomTextField(iconName: "lock", placeholder: "Password", isSecure: true, text: $viewModel.password)
                     .autocapitalization(.none)
-                    .modifier(IGTextFieldModifier())
-                    .padding(.top)
 
                 if showPasswordError {
                     Text(passwordErrorMessage)
                         .font(.caption)
                         .foregroundColor(.red)
-                        .padding(.top)
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, 28)
                 }
             }
 
+            // Next Button
             Button {
                 if isValidPassword(viewModel.password) {
                     showPasswordError = false
@@ -46,19 +47,31 @@ struct CreatePasswordView: View {
                     passwordErrorMessage = "Password must be at least 6 characters, contain a letter, a number, and a special character."
                 }
             } label: {
-                Text("Next")
-                    .modifier(MainButtonModifier())
+                Text("Continue")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.primary)
+                    )
+                    .padding(.horizontal)
             }
 
             Spacer()
         }
+        .background(Color(.systemBackground))
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Image(systemName: "chevron.left")
-                    .imageScale(.large)
-                    .onTapGesture {
-                        dismiss()
-                    }
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                }
             }
         }
     }

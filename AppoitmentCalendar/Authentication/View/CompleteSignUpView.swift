@@ -10,21 +10,29 @@ struct CompleteSignUpView: View {
     @State private var isLoading = false
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 24) {
             Spacer()
             
-            Text("Welcome to Barber App, \(viewModel.username)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.top)
-                .padding(.horizontal, 24)
-                .multilineTextAlignment(.center)
-            
-            Text("Click below to complete registration and start booking")
-                .font(.footnote)
-                .foregroundStyle(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
+            // Welcome Section
+            VStack(spacing: 16) {
+                Image(systemName: "checkmark.circle.fill")
+                    .resizable()
+                    .frame(width: 80, height: 80)
+                    .foregroundStyle(.green)
+                    .symbolEffect(.bounce, value: isLoading)
+                
+                Text("Welcome, \(viewModel.username)!")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                
+                Text("Your account is almost ready. Tap below to finish and start booking your next cut.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
             
             if showError {
                 Text(errorMessage)
@@ -33,13 +41,14 @@ struct CompleteSignUpView: View {
                     .padding(.top, 4)
             }
             
+            // Complete Button
             Button {
                 isLoading = true
                 Task {
                     do {
                         try await viewModel.createUser()
                         isLoading = false
-                        router.push(.home) // Navigate to home screen on success
+                        // router.push(.home) // Removed as createUser might trigger auth state change handled by AuthRootView
                     } catch {
                         isLoading = false
                         showError = true
@@ -47,24 +56,39 @@ struct CompleteSignUpView: View {
                     }
                 }
             } label: {
-                if isLoading {
-                    ProgressView()
-                } else {
-                    Text("Complete Sign Up")
-                        .modifier(MainButtonModifier())
+                Group {
+                    if isLoading {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text("Complete Registration")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    }
                 }
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.primary)
+                )
+                .padding(.horizontal)
             }
             .disabled(isLoading)
             
             Spacer()
         }
+        .background(Color(.systemBackground))
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Image(systemName: "chevron.left")
-                    .imageScale(.large)
-                    .onTapGesture {
-                        dismiss()
-                    }
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                }
             }
         }
     }

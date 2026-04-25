@@ -1,33 +1,46 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject var viewModel = LogInViewModel()
+    @State private var email = ""
+    @State private var password = ""
+    @State private var errorMessage: String?
     @EnvironmentObject var router: NavigationRouter
     @EnvironmentObject var registrationViewModel: RegistrationViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
-        VStack {
+        VStack(spacing: 24) {
             Spacer()
 
-            Image("barber-0")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 220, height: 120)
-                .clipped()
-                .cornerRadius(16)
-                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-                .padding(.bottom, 32)
-
-            VStack {
-                TextField("Enter your email: ", text: $viewModel.email)
-                    .autocapitalization(.none)
-                    .modifier(IGTextFieldModifier())
-
-                SecureField("Enter your password: ", text: $viewModel.password)
-                    .modifier(IGTextFieldModifier())
+            // Logo Section
+            VStack(spacing: 12) {
+                Image("barber-0")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 140, height: 140)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
                 
-                if let errorMessage = viewModel.errorMessage {
+                Text("Barber Shop")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+                
+                Text("Book your next style in seconds.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 20)
+
+            // Input Section
+            VStack(spacing: 16) {
+                CustomTextField(iconName: "envelope", placeholder: "Email", text: $email)
+                    .autocapitalization(.none)
+
+                CustomTextField(iconName: "lock", placeholder: "Password", isSecure: true, text: $password)
+                
+                if let errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .font(.caption)
@@ -35,44 +48,53 @@ struct LoginView: View {
                 }
             }
 
+            // Login Button
             Button {
                 Task {
                     do {
-                        try await authViewModel.login(email: viewModel.email, password: viewModel.password)
+                        try await authViewModel.login(email: email, password: password)
                     } catch {
-                        viewModel.errorMessage = "Login failed: \(error.localizedDescription)"
+                        errorMessage = "Login failed: \(error.localizedDescription)"
                     }
                 }
             } label: {
-                Text("Log In")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                Text("Sign In")
+                    .font(.headline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
+                    .frame(height: 54)
                     .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.blue)
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.primary)
                     )
                     .padding(.horizontal)
-                    .padding(.top)
             }
+            .padding(.top, 8)
 
             Spacer()
-            Divider()
-
-            Button {
-                router.push(.addEmail)
-            } label: {
-                HStack(spacing: 3) {
-                    Text("Don't have an account?")
-                    Text("Sign Up")
-                        .fontWeight(.semibold)
+            
+            // Footer Section
+            VStack(spacing: 16) {
+                Divider()
+                    .padding(.horizontal, 40)
+                
+                Button {
+                    registrationViewModel.reset()
+                    router.push(.addEmail)
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("Don't have an account?")
+                            .foregroundStyle(.secondary)
+                        Text("Sign Up")
+                            .fontWeight(.bold)
+                            .foregroundStyle(.primary)
+                    }
+                    .font(.footnote)
                 }
-                .font(.footnote)
             }
-            .padding(.vertical)
+            .padding(.bottom, 24)
         }
+        .background(Color(.systemBackground))
     }
 }
 

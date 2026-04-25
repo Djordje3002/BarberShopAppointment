@@ -8,6 +8,13 @@ class RegistrationViewModel: ObservableObject {
     @Published var phoneNumber: String = ""
     
     func createUser() async throws {
-        try await AuthService.shared.createUser(email: email, password: password, username: username)
+        try await AuthService.shared.createUser(email: email, password: password, username: username, phoneNumber: phoneNumber)
+    }
+
+    func reset() {
+        email = ""
+        password = ""
+        username = ""
+        phoneNumber = ""
     }
 }

@@ -5,7 +5,7 @@
 //  Created by Djordje on 3. 8. 2025..
 //
 
-import SwiftUI  
+import Foundation  
 
 // MARK: - Error Handling
 enum AuthError: LocalizedError {

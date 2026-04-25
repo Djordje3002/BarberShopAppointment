@@ -23,18 +23,14 @@ class AuthService {
     
     func login(email: String, password: String) async throws {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
-        await MainActor.run {
-            self.userSession = result.user
-        }
+        self.userSession = result.user
         try await loadUserData()
     }
     
-    func createUser(email: String, password: String, username: String) async throws {
+    func createUser(email: String, password: String, username: String, phoneNumber: String) async throws {
         let result = try await Auth.auth().createUser(withEmail: email, password: password)
-        await MainActor.run {
-            self.userSession = result.user
-        }
-        await uploadUserData(uid: result.user.uid, username: username, email: email)
+        self.userSession = result.user
+        await uploadUserData(uid: result.user.uid, username: username, email: email, phoneNumber: phoneNumber)
     }
 
     
@@ -45,30 +41,37 @@ class AuthService {
         let snapshot = try await Firestore.firestore().collection("users").document(currentUid).getDocument()
         let user = try? snapshot.data(as: User.self)
 
-        await MainActor.run {
-            self.currentUser = user
-        }
+        self.currentUser = user
     }
     
     func signOut() async throws {
         try? Auth.auth().signOut()
-        await MainActor.run {
-            self.userSession = nil
-            self.currentUser = nil
-        }
+        self.userSession = nil
+        self.currentUser = nil
+    }
+
+    func updateUserData(username: String, phoneNumber: String) async throws {
+        guard let uid = userSession?.uid else { return }
+        
+        let data: [String: Any] = [
+            "username": username,
+            "phoneNumber": phoneNumber
+        ]
+        
+        try await Firestore.firestore().collection("users").document(uid).updateData(data)
+        try await loadUserData()
     }
     
-    private func uploadUserData(uid: String, username: String, email: String) async {
+    private func uploadUserData(uid: String, username: String, email: String, phoneNumber: String) async {
         let user = User(
             id: uid,
             username: username,
             email: email,
+            phoneNumber: phoneNumber,
             role: .client,
             barberId: nil
         )
-        await MainActor.run {
-            self.currentUser = user
-        }
+        self.currentUser = user
 
         guard let encodedUser = try? Firestore.Encoder().encode(user) else { return }
         try? await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
