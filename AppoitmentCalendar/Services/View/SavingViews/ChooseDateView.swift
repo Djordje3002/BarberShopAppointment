@@ -6,8 +6,13 @@ struct ChooseDateView: View {
 
     @State private var selectedMonthOffset = 0
     @State private var selectedDate: Date? = nil
+    @State private var monthBookedSlotKeys: Set<String> = []
+    @State private var monthBarberAvailability: [String: BarberDayAvailability] = [:]
+    @State private var isMonthAvailabilityLoading = false
+    @State private var monthAvailabilityLoaded = false
 
     private let daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    private let times = AppointmentBooking.defaultTimeSlots
 
     var body: some View {
         ZStack {
@@ -28,6 +33,13 @@ struct ChooseDateView: View {
                 VStack(spacing: 14) {
                     monthSelector
                     weekDays
+
+                    if isMonthAvailabilityLoading {
+                        ProgressView("Checking availability...")
+                            .font(BookingTheme.body(13, weight: .semibold))
+                            .foregroundStyle(BookingTheme.subtitleColor)
+                    }
+
                     dateGrid
                 }
                 .padding()
@@ -48,7 +60,7 @@ struct ChooseDateView: View {
         }
         .navigationBarBackButtonHidden()
         .safeAreaInset(edge: .bottom) {
-            let isDisabled = selectedDate == nil
+            let isDisabled = selectedDate == nil || isMonthAvailabilityLoading
 
             VStack(spacing: 10) {
                 Button {
@@ -73,6 +85,9 @@ struct ChooseDateView: View {
             if Calendar.current.startOfDay(for: currentSelection) >= Calendar.current.startOfDay(for: Date()) {
                 selectedDate = currentSelection
             }
+        }
+        .task(id: availabilityTaskId) {
+            await refreshMonthAvailability()
         }
     }
 
@@ -176,7 +191,8 @@ struct ChooseDateView: View {
         for day in range {
             let date = calendar.date(byAdding: .day, value: day - 1, to: firstOfMonth) ?? Date()
             let isPast = calendar.startOfDay(for: date) < calendar.startOfDay(for: Date())
-            dates.append(CalendarDate(day: day, date: date, isEnabled: !isPast))
+            let hasAvailableSlots = isPast ? false : dayHasAvailableSlots(on: date)
+            dates.append(CalendarDate(day: day, date: date, isEnabled: !isPast && hasAvailableSlots))
         }
 
         return dates
@@ -188,6 +204,98 @@ struct ChooseDateView: View {
         let date = Calendar.current.date(byAdding: .month, value: selectedMonthOffset, to: Date()) ?? Date()
         return formatter.string(from: date)
     }
+
+    private var availabilityTaskId: String {
+        "\(appointment.barberName)_\(selectedMonthOffset)"
+    }
+
+    private func dayHasAvailableSlots(on date: Date) -> Bool {
+        let cleanedBarberName = appointment.barberName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedBarberName.isEmpty else { return monthAvailabilityLoaded }
+        guard monthAvailabilityLoaded else { return false }
+
+        let dateKey = Self.dateKeyFormatter.string(from: date)
+        let dayAvailability = monthBarberAvailability[dateKey]
+
+        if dayAvailability?.isDayOff == true {
+            return false
+        }
+
+        for time in times {
+            if appointment.isSlotInPast(date: date, timeLabel: time) {
+                continue
+            }
+
+            if appointment.isSlotUnavailable(
+                date: date,
+                timeLabel: time,
+                dayAvailability: dayAvailability
+            ) {
+                continue
+            }
+
+            guard let slotKey = appointment.slotKey(date: date, timeLabel: time, barberName: cleanedBarberName) else {
+                continue
+            }
+
+            if !monthBookedSlotKeys.contains(slotKey) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    private func refreshMonthAvailability() async {
+        let monthStart = firstDayOfVisibleMonth()
+        guard let monthEnd = Calendar.current.date(byAdding: .month, value: 1, to: monthStart) else {
+            return
+        }
+
+        isMonthAvailabilityLoading = true
+        monthAvailabilityLoaded = false
+        monthBookedSlotKeys = []
+        monthBarberAvailability = [:]
+
+        do {
+            monthBookedSlotKeys = try await appointment.fetchBookedSlotKeys(
+                from: monthStart,
+                to: monthEnd,
+                barberName: appointment.barberName
+            )
+
+            monthBarberAvailability = try await appointment.fetchBarberAvailability(
+                from: monthStart,
+                to: monthEnd,
+                barberName: appointment.barberName
+            )
+        } catch {
+            appointment.errorMessage = error.localizedDescription
+            monthBookedSlotKeys = []
+            monthBarberAvailability = [:]
+        }
+
+        monthAvailabilityLoaded = true
+        isMonthAvailabilityLoading = false
+
+        if let selectedDate, !dayHasAvailableSlots(on: selectedDate) {
+            self.selectedDate = nil
+        }
+    }
+
+    private func firstDayOfVisibleMonth() -> Date {
+        let calendar = Calendar.current
+        let shiftedMonth = calendar.date(byAdding: .month, value: selectedMonthOffset, to: Date()) ?? Date()
+        return calendar.date(from: calendar.dateComponents([.year, .month], from: shiftedMonth)) ?? shiftedMonth
+    }
+
+    private static let dateKeyFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 }
 
 extension Date {

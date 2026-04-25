@@ -10,7 +10,7 @@ struct BarberProfile: Identifiable, Hashable {
         self.name = name
         self.bio = bio
         self.imageName = imageName
-        self.id = BarberDirectory.normalizedBarberId(from: name)
+        self.id = name.normalizedBarberId()
     }
 }
 
@@ -22,12 +22,6 @@ enum BarberDirectory {
         BarberProfile(name: "Chris", bio: "Fast and clean cuts", imageName: "barber-0")
     ]
 
-    static func normalizedBarberId(from value: String) -> String {
-        value
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-            .replacingOccurrences(of: " ", with: "-")
-    }
 }
 
 struct BarberSeedAccount: Identifiable, Hashable {

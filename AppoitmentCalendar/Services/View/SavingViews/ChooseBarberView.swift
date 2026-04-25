@@ -10,16 +10,20 @@ struct ChooseBarberView: View {
         ZStack {
             BookingScreenBackground()
 
-            VStack(spacing: 14) {
-                CustomNavBar(title: "Choose Barber")
+            VStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("STEP 1 OF 5")
+                        .font(BookingTheme.body(12, weight: .bold))
+                        .tracking(1)
+                        .foregroundStyle(BookingTheme.accent)
 
-                BookingStepHeader(
-                    step: 1,
-                    total: 5,
-                    title: "Select Your Barber",
-                    subtitle: "Choose who will handle your cut before service, date, and time."
-                )
+                    Text("Select Your Barber")
+                        .font(BookingTheme.sectionTitle(30))
+                        .foregroundStyle(BookingTheme.titleColor)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
+                .padding(.top, 6)
                 .bookingEntrance(delay: 0.03)
 
                 ScrollView {
@@ -34,6 +38,7 @@ struct ChooseBarberView: View {
                 }
             }
         }
+        .ignoresSafeArea(edges: .top)
         .navigationBarBackButtonHidden()
     }
 

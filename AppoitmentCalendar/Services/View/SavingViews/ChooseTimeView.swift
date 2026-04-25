@@ -6,11 +6,9 @@ struct ChooseTimeView: View {
 
     @State private var isLoading = false
     @State private var selectedTime: String? = nil
+    @State private var dayAvailability: BarberDayAvailability?
 
-    private let times = [
-        "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-        "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"
-    ]
+    private let times = AppointmentBooking.defaultTimeSlots
 
     var body: some View {
         ZStack {
@@ -35,6 +33,13 @@ struct ChooseTimeView: View {
                     legend
                         .padding(.horizontal)
                         .bookingEntrance(delay: 0.09)
+
+                    if dayAvailability?.isDayOff == true {
+                        Text("This barber is unavailable for the whole day.")
+                            .font(BookingTheme.body(14, weight: .semibold))
+                            .foregroundStyle(.gray)
+                            .padding(.horizontal)
+                    }
 
                     ScrollView {
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 2), spacing: 10) {
@@ -68,6 +73,15 @@ struct ChooseTimeView: View {
                         barberName: appointment.barberName
                     ) else {
                         appointment.errorMessage = "This slot is already booked. Please choose another time."
+                        return
+                    }
+
+                    guard !appointment.isSlotUnavailable(
+                        date: appointment.selectedDate,
+                        timeLabel: selectedTime,
+                        dayAvailability: dayAvailability
+                    ) else {
+                        appointment.errorMessage = "This slot is unavailable for the barber. Please choose another time."
                         return
                     }
 
@@ -111,6 +125,7 @@ struct ChooseTimeView: View {
             legendItem(title: "Available", color: BookingTheme.accent.opacity(0.16), icon: "circle")
             legendItem(title: "Booked", color: Color.red.opacity(0.16), icon: "xmark")
             legendItem(title: "Past", color: Color.gray.opacity(0.18), icon: "clock")
+            legendItem(title: "Unavailable", color: Color.gray.opacity(0.25), icon: "minus")
         }
     }
 
@@ -141,10 +156,16 @@ struct ChooseTimeView: View {
             timeLabel: time
         )
 
+        let isUnavailable = appointment.isSlotUnavailable(
+            date: appointment.selectedDate,
+            timeLabel: time,
+            dayAvailability: dayAvailability
+        )
+
         let isSelected = selectedTime == time
 
         return Button {
-            if !isBooked && !isPast {
+            if !isBooked && !isPast && !isUnavailable {
                 withAnimation(.easeOut(duration: 0.2)) {
                     selectedTime = time
                 }
@@ -158,17 +179,19 @@ struct ChooseTimeView: View {
                     Image(systemName: "xmark.circle.fill")
                 } else if isPast {
                     Image(systemName: "clock.fill")
+                } else if isUnavailable {
+                    Image(systemName: "minus.circle.fill")
                 } else if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                 }
             }
-            .foregroundStyle(slotTextColor(isBooked: isBooked, isPast: isPast, isSelected: isSelected))
+            .foregroundStyle(slotTextColor(isBooked: isBooked, isPast: isPast, isUnavailable: isUnavailable, isSelected: isSelected))
             .padding(.horizontal, 12)
             .frame(maxWidth: .infinity)
             .frame(height: 54)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(slotBackgroundColor(isBooked: isBooked, isPast: isPast, isSelected: isSelected))
+                    .fill(slotBackgroundColor(isBooked: isBooked, isPast: isPast, isUnavailable: isUnavailable, isSelected: isSelected))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -177,19 +200,21 @@ struct ChooseTimeView: View {
             .shadow(color: BookingTheme.accent.opacity(isSelected ? 0.14 : 0.03), radius: isSelected ? 9 : 4, x: 0, y: 3)
         }
         .buttonStyle(.plain)
-        .disabled(isBooked || isPast || isLoading)
+        .disabled(isBooked || isPast || isUnavailable || isLoading)
     }
 
-    private func slotBackgroundColor(isBooked: Bool, isPast: Bool, isSelected: Bool) -> Color {
+    private func slotBackgroundColor(isBooked: Bool, isPast: Bool, isUnavailable: Bool, isSelected: Bool) -> Color {
         if isBooked { return Color.red.opacity(0.2) }
         if isPast { return Color.gray.opacity(0.18) }
+        if isUnavailable { return Color.gray.opacity(0.24) }
         if isSelected { return BookingTheme.accent.opacity(0.22) }
         return BookingTheme.surface
     }
 
-    private func slotTextColor(isBooked: Bool, isPast: Bool, isSelected: Bool) -> Color {
+    private func slotTextColor(isBooked: Bool, isPast: Bool, isUnavailable: Bool, isSelected: Bool) -> Color {
         if isBooked { return .red }
         if isPast { return .gray }
+        if isUnavailable { return .gray }
         if isSelected { return BookingTheme.accent }
         return BookingTheme.titleColor
     }
@@ -212,6 +237,10 @@ struct ChooseTimeView: View {
                 date: appointment.selectedDate,
                 barberName: appointment.barberName
             )
+            dayAvailability = try await appointment.fetchBarberDayAvailability(
+                date: appointment.selectedDate,
+                barberName: appointment.barberName
+            )
 
             if let selectedTime,
                appointment.isSlotBooked(
@@ -226,9 +255,17 @@ struct ChooseTimeView: View {
                         timeLabel: selectedTime
                       ) {
                 self.selectedTime = nil
+            } else if let selectedTime,
+                      appointment.isSlotUnavailable(
+                        date: appointment.selectedDate,
+                        timeLabel: selectedTime,
+                        dayAvailability: dayAvailability
+                      ) {
+                self.selectedTime = nil
             }
         } catch {
             appointment.errorMessage = error.localizedDescription
+            dayAvailability = nil
         }
         isLoading = false
     }

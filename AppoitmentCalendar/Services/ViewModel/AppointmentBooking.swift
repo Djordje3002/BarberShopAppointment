@@ -2,8 +2,87 @@ import Foundation
 import SwiftUI
 import FirebaseFirestore
 
+struct BarberDayAvailability: Identifiable, Hashable {
+    let id: String
+    let barberId: String
+    let dateKey: String
+    let isDayOff: Bool
+    let unavailableTimes24: [String]
+    let dayStartAt: Date?
+
+    init?(
+        id: String,
+        barberId: String,
+        dateKey: String,
+        isDayOff: Bool,
+        unavailableTimes24: [String],
+        dayStartAt: Date?
+    ) {
+        let cleanedBarberId = barberId.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedDateKey = dateKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedBarberId.isEmpty, !cleanedDateKey.isEmpty else { return nil }
+
+        self.id = id
+        self.barberId = cleanedBarberId
+        self.dateKey = cleanedDateKey
+        self.isDayOff = isDayOff
+        self.unavailableTimes24 = unavailableTimes24
+            .compactMap(Self.normalizeTime24)
+            .sorted()
+        self.dayStartAt = dayStartAt
+    }
+
+    init?(documentId: String, data: [String: Any]) {
+        let barberId = (data["barberId"] as? String) ?? ""
+        let dateKey = (data["dateKey"] as? String) ?? ""
+        let isDayOff = data["isDayOff"] as? Bool ?? false
+        let unavailableTimes24 = data["unavailableTimes24"] as? [String] ?? []
+        let dayStartAt = (data["dayStartAt"] as? Timestamp)?.dateValue()
+
+        self.init(
+            id: documentId,
+            barberId: barberId,
+            dateKey: dateKey,
+            isDayOff: isDayOff,
+            unavailableTimes24: unavailableTimes24,
+            dayStartAt: dayStartAt
+        )
+    }
+
+    func isBlocked(time24: String) -> Bool {
+        let normalized = Self.normalizeTime24(time24) ?? time24
+        return isDayOff || unavailableTimes24.contains(normalized)
+    }
+
+    static func documentId(barberId: String, dateKey: String) -> String {
+        "\(barberId)_\(dateKey)"
+    }
+
+    static func normalizeTime24(_ value: String) -> String? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        if let date = time24Formatter.date(from: trimmed) {
+            return time24Formatter.string(from: date)
+        }
+        return nil
+    }
+
+    private static let time24Formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+}
+
 @MainActor
 final class AppointmentBooking: ObservableObject {
+
+    static let defaultTimeSlots: [String] = [
+        "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+        "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"
+    ]
 
     @Published var selectedCut: HaircutOption?
     @Published var selectedDate: Date = Date()
@@ -20,6 +99,7 @@ final class AppointmentBooking: ObservableObject {
     private let db = Firestore.firestore()
     private let appointmentsCollection = "appointments"
     private let slotLocksCollection = "appointment_slots"
+    private let barberAvailabilityCollection = "barber_availability"
 
     func bookAppointment(currentUser: User) async throws {
         guard !isLoading else {
@@ -47,7 +127,7 @@ final class AppointmentBooking: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let barberId = normalizedBarberId(from: cleanedBarberName)
+            let barberId = cleanedBarberName.normalizedBarberId()
             let slotStartAt = try makeSlotDate(date: selectedDate, timeLabel: cleanedTime)
             guard slotStartAt > Date() else {
                 errorMessage = AppointmentError.slotInPast.localizedDescription
@@ -61,6 +141,8 @@ final class AppointmentBooking: ObservableObject {
 
             let lockRef = db.collection(slotLocksCollection).document(slotKey)
             let appointmentRef = db.collection(appointmentsCollection).document(slotKey)
+            let availabilityRef = db.collection(barberAvailabilityCollection)
+                .document(BarberDayAvailability.documentId(barberId: barberId, dateKey: dateKey))
             let legacyLockRef = legacySlotKey == slotKey ? nil : db.collection(slotLocksCollection).document(legacySlotKey)
             let legacyAppointmentRef = legacySlotKey == slotKey ? nil : db.collection(appointmentsCollection).document(legacySlotKey)
 
@@ -102,6 +184,8 @@ final class AppointmentBooking: ObservableObject {
             try await createBookingTransaction(
                 lockRef: lockRef,
                 appointmentRef: appointmentRef,
+                availabilityRef: availabilityRef,
+                time24: time24,
                 legacyLockRef: legacyLockRef,
                 legacyAppointmentRef: legacyAppointmentRef,
                 lockData: lockData,
@@ -122,6 +206,12 @@ final class AppointmentBooking: ObservableObject {
                 throw AppointmentError.slotAlreadyBooked
             }
 
+            if nsError.domain == AppointmentError.errorDomain,
+               nsError.code == AppointmentError.barberUnavailable.code {
+                errorMessage = AppointmentError.barberUnavailable.localizedDescription
+                throw AppointmentError.barberUnavailable
+            }
+
             let friendlyMessage = friendlyFirestoreMessage(for: nsError)
             errorMessage = AppointmentError.bookingFailed(friendlyMessage).localizedDescription
             throw AppointmentError.bookingFailed(friendlyMessage)
@@ -129,31 +219,32 @@ final class AppointmentBooking: ObservableObject {
     }
 
     func refreshBookedSlots(date: Date, barberName: String) async throws {
-        let cleanedBarberName = barberName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanedBarberName.isEmpty else {
-            bookedSlotKeys = []
-            return
-        }
-
-        let barberId = normalizedBarberId(from: cleanedBarberName)
         let startOfDay = Calendar.current.startOfDay(for: date)
         guard let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) else {
             bookedSlotKeys = []
             return
         }
-        let dateKey = Self.dateKeyFormatter.string(from: startOfDay)
+        bookedSlotKeys = try await fetchBookedSlotKeys(from: startOfDay, to: endOfDay, barberName: barberName)
+    }
+
+    func fetchBookedSlotKeys(from startDate: Date, to endDate: Date, barberName: String) async throws -> Set<String> {
+        let cleanedBarberName = barberName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedBarberName.isEmpty else { return [] }
+        guard startDate < endDate else { return [] }
+
+        let barberId = cleanedBarberName.normalizedBarberId()
 
         do {
             let indexedSnapshot = try await db.collection(slotLocksCollection)
                 .whereField("barberId", isEqualTo: barberId)
-                .whereField("dateKey", isEqualTo: dateKey)
+                .whereField("slotStartAt", isGreaterThanOrEqualTo: Timestamp(date: startDate))
+                .whereField("slotStartAt", isLessThan: Timestamp(date: endDate))
                 .getDocuments()
 
             let keys = indexedSnapshot.documents.compactMap {
                 canonicalSlotKey(from: $0.data(), fallbackDocumentId: $0.documentID)
             }
-            bookedSlotKeys = Set(keys)
-            return
+            return Set(keys)
         } catch {
             let nsError = error as NSError
             guard isMissingIndexError(nsError) else {
@@ -169,11 +260,95 @@ final class AppointmentBooking: ObservableObject {
             let data = document.data()
             guard let slotTimestamp = data["slotStartAt"] as? Timestamp else { return nil }
             let slotDate = slotTimestamp.dateValue()
-            guard slotDate >= startOfDay, slotDate < endOfDay else { return nil }
+            guard slotDate >= startDate, slotDate < endDate else { return nil }
             return canonicalSlotKey(from: data, fallbackDocumentId: document.documentID)
         }
 
-        bookedSlotKeys = Set(fallbackKeys)
+        return Set(fallbackKeys)
+    }
+
+    func fetchBarberAvailability(from startDate: Date, to endDate: Date, barberName: String) async throws -> [String: BarberDayAvailability] {
+        let cleanedBarberName = barberName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedBarberName.isEmpty else { return [:] }
+        guard startDate < endDate else { return [:] }
+
+        let barberId = cleanedBarberName.normalizedBarberId()
+        let startKey = Self.dateKeyFormatter.string(from: startDate)
+        let endKey = Self.dateKeyFormatter.string(from: endDate)
+
+        let snapshot = try await db.collection(barberAvailabilityCollection)
+            .whereField("barberId", isEqualTo: barberId)
+            .getDocuments()
+
+        let items = snapshot.documents.compactMap { document in
+            BarberDayAvailability(documentId: document.documentID, data: document.data())
+        }
+
+        return Dictionary(uniqueKeysWithValues: items
+            .filter { item in
+                item.dateKey >= startKey && item.dateKey < endKey
+            }
+            .map { ($0.dateKey, $0) })
+    }
+
+    func fetchBarberDayAvailability(date: Date, barberName: String) async throws -> BarberDayAvailability? {
+        let cleanedBarberName = barberName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedBarberName.isEmpty else { return nil }
+
+        let dateKey = Self.dateKeyFormatter.string(from: date)
+        let barberId = cleanedBarberName.normalizedBarberId()
+        let docId = BarberDayAvailability.documentId(barberId: barberId, dateKey: dateKey)
+
+        let snapshot = try await db.collection(barberAvailabilityCollection).document(docId).getDocument()
+        guard let data = snapshot.data() else { return nil }
+        return BarberDayAvailability(documentId: docId, data: data)
+    }
+
+    func saveBarberAvailability(
+        barberId: String,
+        date: Date,
+        isDayOff: Bool,
+        unavailableTimes24: [String]
+    ) async throws {
+        let normalizedBarberId = barberId.normalizedBarberId()
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        let dateKey = Self.dateKeyFormatter.string(from: startOfDay)
+        let normalizedTimes = unavailableTimes24
+            .compactMap(BarberDayAvailability.normalizeTime24)
+            .sorted()
+        let docId = BarberDayAvailability.documentId(barberId: normalizedBarberId, dateKey: dateKey)
+        let docRef = db.collection(barberAvailabilityCollection).document(docId)
+
+        if !isDayOff && normalizedTimes.isEmpty {
+            try await docRef.delete()
+            return
+        }
+
+        let data: [String: Any] = [
+            "barberId": normalizedBarberId,
+            "dateKey": dateKey,
+            "dayStartAt": Timestamp(date: startOfDay),
+            "isDayOff": isDayOff,
+            "unavailableTimes24": normalizedTimes,
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+
+        try await docRef.setData(data, merge: true)
+    }
+
+    func isSlotUnavailable(
+        date: Date,
+        timeLabel: String,
+        dayAvailability: BarberDayAvailability?
+    ) -> Bool {
+        guard let dayAvailability else { return false }
+        guard let slotDate = try? makeSlotDate(date: date, timeLabel: timeLabel) else { return true }
+
+        let dateKey = Self.dateKeyFormatter.string(from: slotDate)
+        guard dayAvailability.dateKey == dateKey else { return false }
+
+        let time24 = Self.time24Formatter.string(from: slotDate)
+        return dayAvailability.isBlocked(time24: time24)
     }
 
     func isSlotBooked(date: Date, timeLabel: String, barberName: String) -> Bool {
@@ -205,7 +380,7 @@ final class AppointmentBooking: ObservableObject {
 
         do {
             let slotStartAt = try makeSlotDate(date: date, timeLabel: timeLabel)
-            let barberId = normalizedBarberId(from: cleanedBarberName)
+            let barberId = cleanedBarberName.normalizedBarberId()
             let dateKey = Self.dateKeyFormatter.string(from: slotStartAt)
             let time24 = Self.time24Formatter.string(from: slotStartAt)
             return makeSlotKey(barberId: barberId, dateKey: dateKey, time24: time24)
@@ -284,6 +459,8 @@ final class AppointmentBooking: ObservableObject {
     private func createBookingTransaction(
         lockRef: DocumentReference,
         appointmentRef: DocumentReference,
+        availabilityRef: DocumentReference,
+        time24: String,
         legacyLockRef: DocumentReference?,
         legacyAppointmentRef: DocumentReference?,
         lockData: [String: Any],
@@ -292,6 +469,19 @@ final class AppointmentBooking: ObservableObject {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             db.runTransaction({ transaction, errorPointer -> Any? in
                 do {
+                    let availabilitySnapshot = try transaction.getDocument(availabilityRef)
+                    if availabilitySnapshot.exists {
+                        let data = availabilitySnapshot.data() ?? [:]
+                        let isDayOff = data["isDayOff"] as? Bool ?? false
+                        let unavailableTimes = Set((data["unavailableTimes24"] as? [String] ?? [])
+                            .compactMap(BarberDayAvailability.normalizeTime24))
+                        let normalizedTime = BarberDayAvailability.normalizeTime24(time24) ?? time24
+                        if isDayOff || unavailableTimes.contains(normalizedTime) {
+                            errorPointer?.pointee = AppointmentError.barberUnavailable.asNSError()
+                            return nil
+                        }
+                    }
+
                     let existingLock = try transaction.getDocument(lockRef)
                     if existingLock.exists {
                         errorPointer?.pointee = AppointmentError.slotAlreadyBooked.asNSError()
@@ -337,12 +527,7 @@ final class AppointmentBooking: ObservableObject {
         }
     }
 
-    private func normalizedBarberId(from barberName: String) -> String {
-        barberName
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-            .replacingOccurrences(of: " ", with: "-")
-    }
+
 
     private func makeSlotDate(date: Date, timeLabel: String) throws -> Date {
         guard let timeOnly = Self.timeLabelFormatter.date(from: timeLabel) else {
@@ -496,6 +681,7 @@ enum AppointmentError: LocalizedError {
     case invalidSlot
     case slotInPast
     case slotAlreadyBooked
+    case barberUnavailable
     case bookingInProgress
     case bookingFailed(String)
     case deletionFailed(String)
@@ -508,6 +694,8 @@ enum AppointmentError: LocalizedError {
             return 400
         case .slotAlreadyBooked:
             return 409
+        case .barberUnavailable:
+            return 423
         default:
             return 500
         }
@@ -529,6 +717,8 @@ enum AppointmentError: LocalizedError {
             return "You cannot book a time slot that has already passed."
         case .slotAlreadyBooked:
             return "This slot is already booked. Please choose another time."
+        case .barberUnavailable:
+            return "This time is unavailable for the barber. Please choose another slot."
         case .bookingInProgress:
             return "Booking is already in progress."
         case .bookingFailed(let message):
