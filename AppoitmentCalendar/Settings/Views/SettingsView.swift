@@ -1,9 +1,8 @@
-
-
 import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var router: NavigationRouter
+    @State private var showLogoutAlert = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,22 +39,32 @@ struct SettingsView: View {
                         router.push(.privacyPolicy)
                     }
 
+                    #if DEBUG
                     SettingsRow(text: "Barber Accounts", icon: "person.3.fill") {
                         router.push(.seedBarberAccounts)
                     }
+                    #endif
 
                     SettingsRow(
                         text: "Log Out",
                         icon: "arrow.backward.square.fill",
                         action: {
-                            Task {
-                                try? await AuthService.shared.signOut()
-                            }
+                            showLogoutAlert = true
                         }
                     )
                 }
                 .padding()
             }
+        }
+        .alert("Log Out", isPresented: $showLogoutAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Log Out", role: .destructive) {
+                Task {
+                    try? await AuthService.shared.signOut()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to log out?")
         }
     }
 }

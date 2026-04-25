@@ -72,7 +72,7 @@ extension HomeView {
     private var bookingSection: some View {
         VStack(spacing: 16) {
             CustomButton(title: "Book Appointment Now") {
-                router.push(.chooseBarber)
+                router.push(.services)
             }
             .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
         }

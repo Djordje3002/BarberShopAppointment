@@ -34,17 +34,33 @@ struct NewsView: View {
 
 struct NewsDetailView: View {
     let item: NewsModel
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if let imageName = item.imageName {
-                    Image(imageName)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 250)
-                        .clipped()
+                    ZStack(alignment: .topLeading) {
+                        Image(imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 350)
+                            .clipped()
+                        
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.title3.bold())
+                                .foregroundColor(.primary)
+                                .padding(12)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                        }
+                        .padding(.top, 60)
+                        .padding(.leading, 20)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -67,9 +83,11 @@ struct NewsDetailView: View {
                         .lineSpacing(6)
                 }
                 .padding(.horizontal)
+                .padding(.bottom, 40)
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .ignoresSafeArea(edges: .top)
+        .navigationBarHidden(true)
     }
 }
 

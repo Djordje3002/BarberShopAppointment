@@ -4,6 +4,8 @@ import Foundation
 final class ReviewsViewModel: ObservableObject {
     @Published var reviews: [Review] = []
 
+    // TODO: Connect to Firestore `reviews` collection when ready.
+    // Currently serving static mock data for UI demonstration.
     func load() {
         reviews = [
             Review(author: "Ana", message: "Fast service and great atmosphere.", rating: 5),
