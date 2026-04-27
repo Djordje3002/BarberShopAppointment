@@ -10,37 +10,21 @@ struct CustomTabBar: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Button(action: {
                     withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
                         selectedTab = tab
                     }
                 }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 15, weight: .bold))
-                            .frame(width: 18, height: 18)
-
-                        if selectedTab == tab {
-                            Text(tab.title)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                .lineLimit(1)
-                                .transition(
-                                    .asymmetric(
-                                        insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                        removal: .opacity
-                                    )
-                                )
-                        }
-                    }
+                    Image(systemName: tab.icon)
+                        .font(.system(size: 18, weight: .bold))
+                        .frame(width: 44, height: 44)
                     .foregroundStyle(selectedTab == tab ? Color.white : Color(red: 0.36, green: 0.42, blue: 0.54))
-                    .padding(.horizontal, selectedTab == tab ? 14 : 10)
-                    .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
                     .background {
                         if selectedTab == tab {
-                            Capsule()
+                            Circle()
                                 .fill(
                                     LinearGradient(
                                         colors: [
@@ -53,7 +37,7 @@ struct CustomTabBar: View {
                                 )
                                 .matchedGeometryEffect(id: "ACTIVE_TAB", in: selectionAnimation)
                         } else {
-                            Capsule()
+                            Circle()
                                 .fill(Color.clear)
                         }
                     }
