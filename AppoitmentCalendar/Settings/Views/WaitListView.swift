@@ -13,7 +13,7 @@ struct WaitListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            CustomNavBar(title: "My Appointments")
+            header
 
             if isLoading || isDeleting {
                 ProgressView()
@@ -45,6 +45,7 @@ struct WaitListView: View {
             }
         }
         .navigationBarBackButtonHidden()
+        .toolbar(.hidden, for: .navigationBar)
         .task(id: contentVM.currentUser?.email ?? "") {
             await refreshAppointments()
         }
@@ -82,6 +83,21 @@ struct WaitListView: View {
         } message: {
             Text(deleteErrorMessage)
         }
+    }
+
+    private var header: some View {
+        HStack(spacing: 0) {
+            Text("My Appointments")
+                .font(.title2.bold())
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
+        .background(Color.white)
+        .foregroundStyle(.black)
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
     private var emptyState: some View {

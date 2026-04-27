@@ -122,6 +122,20 @@ struct ConfirmAppointmentView: View {
                 Text(user.email ?? "No email")
                     .font(BookingTheme.body(14, weight: .regular))
                     .foregroundStyle(BookingTheme.subtitleColor)
+
+                Text(user.phoneNumber ?? "No phone number")
+                    .font(BookingTheme.body(14, weight: .regular))
+                    .foregroundStyle(BookingTheme.subtitleColor)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "phone.badge.waveform")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(BookingTheme.accent)
+                    Text("We will contact you before your appointment.")
+                        .font(BookingTheme.body(13, weight: .semibold))
+                        .foregroundStyle(BookingTheme.accent)
+                }
+                .padding(.top, 4)
             } else {
                 Text("Loading user info...")
                     .font(BookingTheme.body(14, weight: .regular))

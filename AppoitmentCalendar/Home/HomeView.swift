@@ -39,7 +39,7 @@ extension HomeView {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(maxWidth: .infinity)
-                .frame(height: 350)
+                .frame(height: 430)
                 .overlay(
                     LinearGradient(
                         gradient: Gradient(colors: [.clear, .black.opacity(0.8)]),

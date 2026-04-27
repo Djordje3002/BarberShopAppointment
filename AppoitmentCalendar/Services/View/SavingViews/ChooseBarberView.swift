@@ -10,7 +10,7 @@ struct ChooseBarberView: View {
         ZStack {
             BookingScreenBackground()
 
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("STEP 1 OF 5")
                         .font(BookingTheme.body(12, weight: .bold))
@@ -23,7 +23,7 @@ struct ChooseBarberView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
-                .padding(.top, 6)
+                .padding(.top, 12)
                 .bookingEntrance(delay: 0.03)
 
                 ScrollView {
@@ -36,9 +36,9 @@ struct ChooseBarberView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 120)
                 }
+                .scrollIndicators(.hidden)
             }
         }
-        .ignoresSafeArea(edges: .top)
         .navigationBarBackButtonHidden()
     }
 

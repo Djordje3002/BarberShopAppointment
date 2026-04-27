@@ -19,8 +19,8 @@ struct ServicesView: View {
                 CustomNavBar(title: "Choose Haircut")
 
                 BookingStepHeader(
-                    step: 1,
-                    total: 4,
+                    step: 2,
+                    total: 5,
                     title: "Pick Your Service",
                     subtitle: "Select the haircut package for your appointment."
                 )

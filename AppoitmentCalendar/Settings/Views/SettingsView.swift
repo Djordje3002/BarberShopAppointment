@@ -9,13 +9,15 @@ struct SettingsView: View {
             HStack(spacing: 0) {
                 Text("Settings")
                     .font(.title2.bold())
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
             .background(Color.white)
             .foregroundColor(.black)
             .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-            .padding(.bottom)
 
             ScrollView {
                 VStack(spacing: 16) {
@@ -54,8 +56,10 @@ struct SettingsView: View {
                     )
                 }
                 .padding()
+                .padding(.bottom, 100)
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .alert("Log Out", isPresented: $showLogoutAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Log Out", role: .destructive) {
